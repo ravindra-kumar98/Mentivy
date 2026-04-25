@@ -42,3 +42,8 @@ mentivy-backend/build/
 .vscode/
 *.swp
 *.swo
+
+# ========================
+# Documentation
+# ========================
+docs/
