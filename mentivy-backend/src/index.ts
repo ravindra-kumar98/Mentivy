@@ -3,7 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
-
+import cookieParser from 'cookie-parser';
+import { connectDatabase } from './infrastructure/database/database';
+import authRoutes from './interfaces/routes/auth.routes';
 dotenv.config();
 
 const app = express();
@@ -13,6 +15,7 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Rate Limiter
 const limiter = rateLimit({
@@ -31,6 +34,9 @@ app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to Mentivy API' });
 });
 
+// API Routes
+app.use('/api/v1/auth', authRoutes);
+
 // Global error handler
 app.use((err: any, req: Request, res: Response, next: any) => {
     console.error(err.stack);
@@ -40,6 +46,8 @@ app.use((err: any, req: Request, res: Response, next: any) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+connectDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server is listening on port ${PORT}`);
+    });
 });
