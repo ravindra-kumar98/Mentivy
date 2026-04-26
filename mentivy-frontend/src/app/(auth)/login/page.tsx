@@ -6,10 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { apiClient, setAccessToken } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const res = await apiClient.post('/auth/login', { email, password });
-      setAccessToken(res.data.data.accessToken);
+      setAuth(res.data.data.user, res.data.data.accessToken);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');

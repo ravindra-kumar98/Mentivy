@@ -6,6 +6,9 @@ import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import { connectDatabase } from './infrastructure/database/database';
 import authRoutes from './interfaces/routes/auth.routes';
+import guidanceRoutes from './interfaces/routes/guidance.routes';
+import practiceRoutes from './interfaces/routes/practice.routes';
+import questionRoutes from './interfaces/routes/question.routes';
 dotenv.config();
 
 const app = express();
@@ -36,6 +39,9 @@ app.get('/', (req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/guidance', guidanceRoutes);
+app.use('/api/v1/practice', practiceRoutes);
+app.use('/api/v1/questions', questionRoutes);
 
 // Global error handler
 app.use((err: any, req: Request, res: Response, next: any) => {
