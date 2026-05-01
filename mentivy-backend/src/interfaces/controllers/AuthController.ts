@@ -14,13 +14,17 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
+            res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
+                httpOnly: false, 
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
             res.status(201).json({
                 success: true,
                 message: 'User registered successfully',
-                data: {
-                    user: { id: user._id, email: user.email, role: user.role },
-                    accessToken
-                }
+                data: { user, accessToken }
             });
         } catch (error: any) {
             if (error.message === 'User already exists') {
@@ -42,13 +46,17 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
+            res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
             res.status(200).json({
                 success: true,
                 message: 'Login successful',
-                data: {
-                    user: { id: user._id, email: user.email, role: user.role },
-                    accessToken
-                }
+                data: { user, accessToken }
             });
         } catch (error: any) {
             if (error.message === 'Invalid email or password') {
@@ -76,12 +84,16 @@ export class AuthController {
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
+            res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
+                httpOnly: false,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
             res.status(200).json({
                 success: true,
-                data: {
-                    user: { id: user._id, email: user.email, role: user.role },
-                    accessToken
-                }
+                data: { user, accessToken }
             });
         } catch (error: any) {
             res.status(401).json({ success: false, message: 'Invalid refresh token' });

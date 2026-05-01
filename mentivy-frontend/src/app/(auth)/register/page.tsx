@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { registerUser } from '@/app/actions/user-actions';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,15 +30,14 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError('');
 
-    try {
-      const res = await apiClient.post('/auth/register', formData);
-      setAuth(res.data.data.user, res.data.data.accessToken);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to register');
-    } finally {
-      setIsLoading(false);
+    const result = await registerUser(formData);
+    if (result.success) {
+      setAuth(result.data.user, result.data.accessToken);
+      window.location.href = '/dashboard';
+    } else {
+      setError(result.error || 'Failed to register');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -74,33 +73,6 @@ export default function RegisterPage() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="targetExam">Target Exam</Label>
-          <Input 
-            id="targetExam" 
-            type="text" 
-            placeholder="e.g. SSC CGL"
-            value={formData.targetExam}
-            onChange={handleChange}
-            required 
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="currentLevel">Current Level</Label>
-          <select 
-            id="currentLevel"
-            value={formData.currentLevel}
-            onChange={handleChange}
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-          >
-            <option value="BEGINNER">Beginner</option>
-            <option value="INTERMEDIATE">Intermediate</option>
-            <option value="ADVANCED">Advanced</option>
-          </select>
-        </div>
-      </div>
-      
       <Button type="submit" className="w-full mt-6" isLoading={isLoading}>
         Create Account
       </Button>

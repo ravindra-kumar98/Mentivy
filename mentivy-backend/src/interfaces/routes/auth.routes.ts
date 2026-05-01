@@ -11,9 +11,9 @@ const registerSchema = z.object({
         password: z.string().min(6, 'Password must be at least 6 characters'),
         role: z.enum(['STUDENT', 'ADMIN']).optional(),
         phoneNumber: z.string().optional(),
-        targetExam: z.string().optional(),
-        dailyTimeAvailability: z.number().optional(),
-        currentLevel: z.enum(['BEGINNER', 'INTERMEDIATE', 'ADVANCED']).optional()
+        targetExam: z.string().nullable().optional(),
+        dailyTimeAvailability: z.number().nullable().optional(),
+        currentLevel: z.string().optional()
     })
 });
 

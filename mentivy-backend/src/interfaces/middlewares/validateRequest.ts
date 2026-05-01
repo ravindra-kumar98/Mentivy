@@ -3,6 +3,7 @@ import { z, ZodError } from 'zod';
 
 export const validateRequest = (schema: z.ZodSchema) => 
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    console.log('Incoming Request Body:', JSON.stringify(req.body, null, 2));
     try {
         await schema.parseAsync({
             body: req.body,
@@ -12,6 +13,7 @@ export const validateRequest = (schema: z.ZodSchema) =>
         next();
     } catch (error) {
         if (error instanceof ZodError) {
+            console.error('Validation Error Details:', JSON.stringify(error.issues, null, 2));
             res.status(400).json({
                 success: false,
                 message: 'Validation failed',

@@ -42,13 +42,25 @@ export class AuthService {
         // Create UserProfile mapping
         await UserProfileModel.create({
             userId: user._id.toString(),
-            targetExam: data.targetExam || 'UNKNOWN',
-            dailyTimeAvailability: data.dailyTimeAvailability || 120,
-            currentLevel: data.currentLevel || 'BEGINNER'
+            targetExam: 'UNKNOWN',
+            dailyTimeAvailability: 120,
+            currentLevel: 'BEGINNER'
         });
 
+        const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
+        const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
+
         const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
-        return { user, accessToken, refreshToken };
+        return { 
+            user: { 
+                id: user._id, 
+                email: user.email, 
+                role: user.role,
+                needsOnboarding 
+            }, 
+            accessToken, 
+            refreshToken 
+        };
     }
 
     static async login(data: any) {
@@ -62,8 +74,20 @@ export class AuthService {
             throw new Error('Invalid email or password');
         }
 
+        const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
+        const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
+
         const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
-        return { user, accessToken, refreshToken };
+        return { 
+            user: { 
+                id: user._id, 
+                email: user.email, 
+                role: user.role,
+                needsOnboarding 
+            }, 
+            accessToken, 
+            refreshToken 
+        };
     }
 
     static async verifyRefreshToken(token: string) {
@@ -76,8 +100,20 @@ export class AuthService {
             const user = await UserModel.findById(decoded.userId);
             if (!user) throw new Error('User not found');
 
+            const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
+            const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
+
             const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
-            return { user, accessToken, refreshToken };
+            return { 
+                user: { 
+                    id: user._id, 
+                    email: user.email, 
+                    role: user.role,
+                    needsOnboarding 
+                }, 
+                accessToken, 
+                refreshToken 
+            };
         } catch (error) {
             throw new Error('Invalid refresh token');
         }

@@ -6,31 +6,36 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
-import { apiClient } from '@/lib/api-client';
 import { useAuthStore } from '@/store/useAuthStore';
+import { loginUser } from '@/app/actions/user-actions';
 
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    try {
-      const res = await apiClient.post('/auth/login', { email, password });
-      setAuth(res.data.data.user, res.data.data.accessToken);
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to login');
-    } finally {
-      setIsLoading(false);
+    const result = await loginUser(formData);
+    if (result.success) {
+      setAuth(result.data.user, result.data.accessToken);
+      window.location.href = '/dashboard';
+    } else {
+      setError(result.error || 'Invalid email or password');
     }
+    setIsLoading(false);
   };
 
   return (
@@ -46,9 +51,9 @@ export default function LoginPage() {
         <Input 
           id="email" 
           type="email" 
-          placeholder="student@mentivy.com" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="name@example.com" 
+          value={formData.email}
+          onChange={handleChange}
           required 
         />
       </div>
@@ -61,8 +66,8 @@ export default function LoginPage() {
         <Input 
           id="password" 
           type="password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={formData.password}
+          onChange={handleChange}
           required 
         />
       </div>
