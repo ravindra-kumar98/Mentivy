@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { QuestionModel } from '../../infrastructure/database/models/QuestionModel';
 import { QuestionService } from '../../application/services/QuestionService';
+import { GuidanceService } from '../../application/services/GuidanceService';
 import { AuthenticatedRequest } from '../middlewares/authMiddleware';
 import { z } from 'zod';
 
@@ -58,7 +59,8 @@ export class QuestionController {
      */
     static async checkAnswer(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
-            const { questionId, selectedOptionIndex } = req.body;
+            const userId = req.user!.userId;
+            const { questionId, selectedOptionIndex, topicId, timeTaken = 0 } = req.body;
 
             const question = await QuestionModel.findById(questionId);
             if (!question) {
@@ -68,12 +70,23 @@ export class QuestionController {
 
             const isCorrect = question.correctOptionIndex === selectedOptionIndex;
 
+            // Update user stats and SRS
+            const updatedStats = await GuidanceService.processAttempt(
+                userId,
+                topicId || question.topicId,
+                questionId,
+                isCorrect,
+                timeTaken
+            );
+
             res.status(200).json({
                 success: true,
                 data: {
                     isCorrect,
                     correctOptionIndex: question.correctOptionIndex,
                     explanation: question.explanation,
+                    userStatus: updatedStats.status,
+                    accuracy: Math.round(updatedStats.accuracy)
                 }
             });
         } catch (error: any) {

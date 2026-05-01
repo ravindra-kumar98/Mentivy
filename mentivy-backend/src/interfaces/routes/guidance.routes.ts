@@ -8,5 +8,6 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/daily-plan', GuidanceController.getDailyPlan);
+router.get('/stats', GuidanceController.getDashboardStats);
 
 export default router;

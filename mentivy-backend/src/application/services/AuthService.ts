@@ -65,4 +65,21 @@ export class AuthService {
         const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
         return { user, accessToken, refreshToken };
     }
+
+    static async verifyRefreshToken(token: string) {
+        try {
+            const decoded = jwt.verify(
+                token, 
+                process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret'
+            ) as { userId: string };
+            
+            const user = await UserModel.findById(decoded.userId);
+            if (!user) throw new Error('User not found');
+
+            const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
+            return { user, accessToken, refreshToken };
+        } catch (error) {
+            throw new Error('Invalid refresh token');
+        }
+    }
 }

@@ -30,4 +30,10 @@ router.post('/register', validateRequest(registerSchema), AuthController.registe
 // @route   POST /api/v1/auth/login
 router.post('/login', validateRequest(loginSchema), AuthController.login);
 
+// @route   POST /api/v1/auth/refresh
+router.post('/refresh', AuthController.refresh);
+
+// @route   POST /api/v1/auth/logout
+router.post('/logout', AuthController.logout);
+
 export default router;

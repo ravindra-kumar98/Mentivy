@@ -1,5 +1,6 @@
 import { QuestionModel } from '../../infrastructure/database/models/QuestionModel';
 import { UserAttemptModel } from '../../infrastructure/database/models/UserAttemptModel';
+import { UserTopicStatModel } from '../../infrastructure/database/models/UserTopicStatModel';
 
 interface GetQuestionsOptions {
     topicId: string;
@@ -22,9 +23,21 @@ export class QuestionService {
         // Build the query filter
         const filter: Record<string, any> = { topicId };
 
-        if (difficulty) {
-            filter.difficulty = difficulty;
+        let targetDifficulty = difficulty;
+        
+        // If no difficulty provided, adapt based on user mastery
+        if (!targetDifficulty) {
+            const stats = await UserTopicStatModel.findOne({ userId, topicId });
+            if (stats) {
+                if (stats.status === 'WEAK') targetDifficulty = 1;
+                else if (stats.status === 'STRONG') targetDifficulty = 3;
+                else targetDifficulty = 2;
+            } else {
+                targetDifficulty = 2; // Default to Medium
+            }
         }
+
+        filter.difficulty = targetDifficulty;
 
         // Exclude questions the user attempted in the last 7 days
         const sevenDaysAgo = new Date();

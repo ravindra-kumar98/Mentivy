@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
@@ -29,7 +29,9 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { logout } = useAuthStore();
+  // Fixed router reference issue
 
   return (
     <>
@@ -84,7 +86,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
         {/* Bottom Actions */}
         <div className="p-4 border-t border-slate-100 shrink-0">
           <button
-            onClick={() => logout()}
+            onClick={async () => {
+              await logout();
+              router.push('/login');
+            }}
             className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
           >
             <LogOut className="w-5 h-5 text-slate-400" />

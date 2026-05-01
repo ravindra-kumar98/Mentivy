@@ -22,6 +22,8 @@ interface AnswerResult {
   isCorrect: boolean;
   correctOptionIndex: number;
   explanation: string;
+  userStatus: 'WEAK' | 'AVERAGE' | 'STRONG';
+  accuracy: number;
 }
 
 type SessionState = 'loading' | 'question' | 'answered' | 'finished' | 'error';
@@ -79,24 +81,18 @@ function PracticeContent() {
 
     const currentQuestion = questions[currentIndex];
 
-    // 1. Check the answer via the secure backend endpoint
+    // 1. Check the answer via the secure backend endpoint (this also updates SRS stats)
     try {
       const checkRes = await apiClient.post('/questions/check', {
         questionId: currentQuestion.id,
         selectedOptionIndex: optionIndex,
+        topicId: currentQuestion.topicId,
+        timeTaken: timer
       });
       const result: AnswerResult = checkRes.data.data;
       setAnswerResult(result);
 
-      // 2. Submit the attempt to update UserTopicStat (SRS engine)
-      apiClient.post('/practice/submit', {
-        topicId: currentQuestion.topicId,
-        questionId: currentQuestion.id,
-        isCorrect: result.isCorrect,
-        timeTaken: timer,
-      }).catch(() => {}); // Fire-and-forget, don't block UX
-
-      // 3. Update session score
+      // 2. Update session score
       if (result.isCorrect) {
         setScore(s => ({ ...s, correct: s.correct + 1 }));
       }
@@ -281,7 +277,21 @@ function PracticeContent() {
         <div className="animate-in slide-in-from-bottom-2 duration-300 space-y-4">
           {answerResult?.explanation && (
             <div className={cn("p-4 rounded-xl border text-sm leading-relaxed", answerResult.isCorrect ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-orange-50 border-orange-200 text-orange-800")}>
-              <strong>{answerResult.isCorrect ? '✅ Correct! ' : '❌ Incorrect. '}</strong>
+              <div className="flex items-center justify-between mb-2">
+                <strong>{answerResult.isCorrect ? '✅ Correct! ' : '❌ Incorrect. '}</strong>
+                <div className="flex gap-2">
+                  <span className="bg-white/50 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                    Mastery: {answerResult.accuracy}%
+                  </span>
+                  <span className={cn(
+                    "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                    answerResult.userStatus === 'STRONG' ? "bg-emerald-200 text-emerald-800" :
+                    answerResult.userStatus === 'AVERAGE' ? "bg-blue-200 text-blue-800" : "bg-orange-200 text-orange-800"
+                  )}>
+                    {answerResult.userStatus}
+                  </span>
+                </div>
+              </div>
               {answerResult.explanation}
             </div>
           )}

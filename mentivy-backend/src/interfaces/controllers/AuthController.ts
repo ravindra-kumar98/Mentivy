@@ -58,4 +58,42 @@ export class AuthController {
             res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
         }
     }
+
+    static async refresh(req: Request, res: Response): Promise<void> {
+        try {
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) {
+                res.status(401).json({ success: false, message: 'Refresh token missing' });
+                return;
+            }
+
+            const { user, accessToken, refreshToken: newRefreshToken } = await AuthService.verifyRefreshToken(refreshToken);
+
+            res.cookie('refreshToken', newRefreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            });
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    user: { id: user._id, email: user.email, role: user.role },
+                    accessToken
+                }
+            });
+        } catch (error: any) {
+            res.status(401).json({ success: false, message: 'Invalid refresh token' });
+        }
+    }
+
+    static async logout(req: Request, res: Response): Promise<void> {
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
+        res.status(200).json({ success: true, message: 'Logged out successfully' });
+    }
 }

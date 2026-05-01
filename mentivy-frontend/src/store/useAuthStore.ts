@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { setAccessToken } from '@/lib/api-client';
+import { setAccessToken, apiClient } from '@/lib/api-client';
 
 export interface User {
   id: string;
@@ -27,10 +27,14 @@ export const useAuthStore = create<AuthState>()(
         setAccessToken(accessToken);
         set({ user, isAuthenticated: true, isLoading: false });
       },
-      logout: () => {
+      logout: async () => {
+        try {
+          await apiClient.post('/auth/logout');
+        } catch (err) {
+          // Ignore error, we still want to logout locally
+        }
         setAccessToken(''); // Clear token in axios
         set({ user: null, isAuthenticated: false, isLoading: false });
-        // Optional: clear any other local storage data related to user session here
       },
       setLoading: (loading) => set({ isLoading: loading }),
     }),

@@ -11,7 +11,7 @@ const protectedPrefixes = ['/dashboard', '/study-plan', '/practice', '/analytics
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Get the refresh token from cookies
   const hasToken = request.cookies.has('refreshToken');
 
