@@ -37,8 +37,8 @@ export const requireAuth = (req: AuthenticatedRequest, res: Response, next: Next
             // If it failed and it was from a cookie, it might be a refresh token
             if (req.cookies?.refreshToken && token === req.cookies.refreshToken) {
                 const decoded = jwt.verify(token, refreshSecret) as { userId: string; role: string };
-                // Refresh tokens usually only have userId, but we'll adapt
-                req.user = { userId: decoded.userId, role: 'STUDENT' }; // Default role or fetch from DB
+                // Set role from decoded token instead of default STUDENT
+                req.user = { userId: decoded.userId, role: decoded.role || 'STUDENT' };
                 next();
             } else {
                 throw err;

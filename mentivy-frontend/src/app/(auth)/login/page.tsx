@@ -31,7 +31,11 @@ export default function LoginPage() {
     const result = await loginUser(formData);
     if (result.success) {
       setAuth(result.data.user, result.data.accessToken);
-      window.location.href = '/dashboard';
+      if (result.data.user.role === 'ADMIN') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } else {
       setError(result.error || 'Invalid email or password');
     }

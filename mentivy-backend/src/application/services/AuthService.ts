@@ -12,7 +12,7 @@ export class AuthService {
         );
 
         const refreshToken = jwt.sign(
-            { userId },
+            { userId, role },
             process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret',
             { expiresIn: '7d' }
         );

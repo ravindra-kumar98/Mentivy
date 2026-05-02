@@ -42,8 +42,8 @@ async function serverActionRequest(endpoint: string, method: string, body?: any)
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || 'Server action failed');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || 'Server action failed');
   }
 
   return response.json();
