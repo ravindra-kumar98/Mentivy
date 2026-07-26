@@ -9,6 +9,9 @@ const router = Router();
 router.use(requireAuth);
 router.use(requireAdmin);
 
+// Stats overview
+router.get('/stats', AdminController.getStats);
+
 // Topics
 router.get('/topics', AdminController.getTopics);
 router.post('/topics', AdminController.createTopic);

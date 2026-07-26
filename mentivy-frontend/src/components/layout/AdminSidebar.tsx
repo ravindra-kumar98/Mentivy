@@ -4,20 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  Database, 
-  Users, 
-  Settings,
+import {
+  LayoutDashboard,
+  Database,
   LogOut
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const navigation = [
-  { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+  { name: 'Overview',   href: '/admin',         icon: LayoutDashboard },
   { name: 'Content CMS', href: '/admin/content', icon: Database },
-  { name: 'User Management', href: '/admin/users', icon: Users },
-  { name: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
 interface AdminSidebarProps {
@@ -91,10 +87,12 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
         <div className="p-4 border-t border-slate-800 shrink-0">
           <div className="px-4 py-3 mb-2 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xs">AD</span>
+              <span className="text-white font-bold text-xs">
+                {useAuthStore.getState().user?.email?.slice(0, 2).toUpperCase() ?? 'AD'}
+              </span>
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-bold text-white truncate">Administrator</span>
+              <span className="text-sm font-bold text-white truncate">{useAuthStore.getState().user?.email ?? 'Administrator'}</span>
               <span className="text-xs text-emerald-400 font-medium">System Online</span>
             </div>
           </div>

@@ -9,12 +9,13 @@ export default async function AnalyticsPage({
   searchParams: Promise<{ days?: string }>;
 }) {
   const { days } = await searchParams;
-  
+  const activeDays = parseInt(days || '7');
+
   try {
-    const res = await serverFetch(`/analytics?days=${days || 7}`);
+    const res = await serverFetch(`/analytics?days=${activeDays}`);
     const data = res.data;
 
-    return <AnalyticsUI data={data} />;
+    return <AnalyticsUI data={data} activeDays={activeDays} />;
   } catch (err: any) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">

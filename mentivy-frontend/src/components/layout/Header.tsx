@@ -33,7 +33,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
         
         <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 relative transition-colors">
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
 
         <div className="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
@@ -43,7 +42,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <UserIcon className="w-5 h-5 text-primary-600" />
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-sm font-medium text-slate-700 leading-none">Student</p>
+            <p className="text-sm font-medium text-slate-700 leading-none capitalize">{user?.role?.toLowerCase() ?? 'Student'}</p>
             <p className="text-xs text-slate-500 mt-1 leading-none truncate max-w-[120px]">
               {user?.email || 'Profile'}
             </p>

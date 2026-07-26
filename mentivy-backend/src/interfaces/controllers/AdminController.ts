@@ -1,8 +1,34 @@
 import { Request, Response } from 'express';
 import { TopicModel } from '../../infrastructure/database/models/TopicModel';
 import { QuestionModel } from '../../infrastructure/database/models/QuestionModel';
+import { UserModel } from '../../infrastructure/database/models/UserModel';
+import { UserAttemptModel } from '../../infrastructure/database/models/UserAttemptModel';
 
 export class AdminController {
+    // ---- Stats ----
+    static async getStats(req: Request, res: Response): Promise<void> {
+        try {
+            const [totalStudents, totalQuestions, totalTopics, totalAttempts] = await Promise.all([
+                UserModel.countDocuments({ role: 'STUDENT' }),
+                QuestionModel.countDocuments(),
+                TopicModel.countDocuments(),
+                UserAttemptModel.countDocuments(),
+            ]);
+
+            res.status(200).json({
+                success: true,
+                data: {
+                    totalStudents,
+                    totalQuestions,
+                    totalTopics,
+                    totalAttempts,
+                }
+            });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+        }
+    }
+
     // ---- Topics ----
     static async getTopics(req: Request, res: Response): Promise<void> {
         try {
