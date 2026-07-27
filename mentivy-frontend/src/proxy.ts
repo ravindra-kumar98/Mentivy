@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Define paths that are accessible only to non-authenticated users
-const publicPaths = ['/login', '/register', '/onboarding'];
+// Paths only for unauthenticated users (login, register)
+const unauthOnlyPaths = ['/login', '/register'];
+
+// Paths accessible to authenticated users for special flows (not blocked by auth redirect)
+const authFlowPaths = ['/onboarding'];
 
 // Define paths that are protected (require authentication)
-// If we had more top-level protected paths, we'd add them here.
-// For now, any path that isn't public and isn't the root '/' can be considered protected if it starts with /dashboard, etc.
 const protectedPrefixes = ['/dashboard', '/study-plan', '/practice', '/analytics', '/settings'];
 
 export function proxy(request: NextRequest) {
@@ -14,38 +15,42 @@ export function proxy(request: NextRequest) {
 
   // Get the refresh token from cookies
   const hasToken = request.cookies.has('refreshToken');
+  const needsOnboarding = request.cookies.get('needsOnboarding')?.value === 'true';
 
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  const isUnauthOnlyPath = unauthOnlyPaths.some(path => pathname.startsWith(path));
+  const isAuthFlowPath = authFlowPaths.some(path => pathname.startsWith(path));
   const isProtectedPath = protectedPrefixes.some(prefix => pathname.startsWith(prefix));
 
-  // 1. Hybrid root route: Logged-in users visiting '/' go straight to dashboard
-  if (pathname === '/' && hasToken) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // 1. Root route: Logged-in users visiting '/' go to their destination
+  if (pathname === '/') {
+    if (hasToken) {
+      return NextResponse.redirect(new URL(needsOnboarding ? '/onboarding' : '/dashboard', request.url));
+    }
+    return NextResponse.next();
   }
 
-  // 2. Onboarding Guard: If user is authenticated but needs onboarding,
-  // force them to stay on the onboarding page.
-  const needsOnboarding = request.cookies.get('needsOnboarding')?.value === 'true';
-  if (hasToken && needsOnboarding && pathname !== '/onboarding' && !isPublicPath) {
+  // 2. Onboarding Guard (MUST CHECK BEFORE other redirects):
+  //    Authenticated users who still need onboarding must stay on /onboarding.
+  if (hasToken && needsOnboarding && !isAuthFlowPath) {
     return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 
-  // 3. If user is trying to access a public auth path (login/register) but already authenticated,
-  // redirect them to the dashboard (unless they need onboarding).
-  if (isPublicPath && hasToken) {
-    const target = needsOnboarding ? '/onboarding' : '/dashboard';
-    if (pathname !== target) {
-      return NextResponse.redirect(new URL(target, request.url));
-    }
+  // 3. Onboarding page access for unauthenticated users → send to login
+  if (isAuthFlowPath && !hasToken) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // 4. If user is trying to access a protected path but they are NOT authenticated,
-  // redirect them to the login page.
+  // 4. Authenticated users visiting login/register → redirect to dashboard
+  if (isUnauthOnlyPath && hasToken) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // 5. Protected paths require authentication
   if (isProtectedPath && !hasToken) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // 5. Otherwise, let the request proceed normally
+  // 6. Otherwise, let the request proceed normally
   return NextResponse.next();
 }
 
