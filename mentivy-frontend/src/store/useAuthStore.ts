@@ -35,6 +35,17 @@ export const useAuthStore = create<AuthState>()(
         }
         setAccessToken(''); // Clear token in axios
         set({ user: null, isAuthenticated: false, isLoading: false });
+
+        if (typeof window !== 'undefined') {
+          // Explicitly clear cookies on client side
+          document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+          document.cookie = 'needsOnboarding=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+          try {
+            localStorage.removeItem('auth-storage');
+          } catch (e) {
+            // ignore
+          }
+        }
       },
       setLoading: (loading) => set({ isLoading: loading }),
     }),

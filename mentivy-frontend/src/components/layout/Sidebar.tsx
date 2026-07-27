@@ -88,7 +88,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           <button
             onClick={async () => {
               await logout();
-              router.push('/login');
+              window.location.href = '/login';
             }}
             className="flex w-full items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
           >
