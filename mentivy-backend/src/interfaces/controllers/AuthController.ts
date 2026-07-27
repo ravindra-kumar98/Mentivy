@@ -10,14 +10,16 @@ export class AuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false, 
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -42,14 +44,16 @@ export class AuthController {
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -80,14 +84,16 @@ export class AuthController {
             res.cookie('refreshToken', newRefreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
@@ -101,11 +107,14 @@ export class AuthController {
     }
 
     static async logout(req: Request, res: Response): Promise<void> {
-        res.clearCookie('refreshToken', {
+        const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        });
+            sameSite: (process.env.NODE_ENV === 'production' ? 'strict' : 'lax') as any,
+            path: '/',
+        };
+        res.clearCookie('refreshToken', cookieOptions);
+        res.clearCookie('needsOnboarding', { ...cookieOptions, httpOnly: false });
         res.status(200).json({ success: true, message: 'Logged out successfully' });
     }
 }
