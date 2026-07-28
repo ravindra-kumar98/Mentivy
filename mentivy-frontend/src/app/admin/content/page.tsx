@@ -3,6 +3,8 @@ import AdminCMS from '@/components/features/admin/AdminCMS';
 import { adminGetTopics } from '@/app/actions/admin-actions';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminContentPage() {
   const result = await adminGetTopics();
   

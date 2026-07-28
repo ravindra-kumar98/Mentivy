@@ -4,6 +4,8 @@ import { Target, TrendingDown, CheckCircle2, ArrowRight, BookOpen } from 'lucide
 import { Button } from '@/components/ui/Button';
 import { serverFetch } from '@/lib/server-fetch';
 
+export const dynamic = 'force-dynamic';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface PlanTopic {

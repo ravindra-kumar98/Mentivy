@@ -2,6 +2,8 @@ import React from 'react';
 import { AlertCircle, Users, Database, Activity, Layers, TrendingUp } from 'lucide-react';
 import { serverFetch } from '@/lib/server-fetch';
 
+export const dynamic = 'force-dynamic';
+
 interface AdminStats {
   totalStudents: number;
   totalQuestions: number;

@@ -3,6 +3,8 @@ import { AlertCircle } from 'lucide-react';
 import { serverFetch } from '@/lib/server-fetch';
 import AnalyticsUI from '@/components/features/analytics/AnalyticsUI';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage({
   searchParams,
 }: {

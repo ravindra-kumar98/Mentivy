@@ -3,6 +3,8 @@ import { AlertCircle } from 'lucide-react';
 import { serverFetch } from '@/lib/server-fetch';
 import StudyPlanUI from '@/components/features/study-plan/StudyPlanUI';
 
+export const dynamic = 'force-dynamic';
+
 export default async function StudyPlanPage() {
   try {
     const res = await serverFetch('/guidance/daily-plan');

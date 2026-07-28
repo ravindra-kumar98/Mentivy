@@ -3,6 +3,8 @@ import { AlertCircle } from 'lucide-react';
 import { serverFetch } from '@/lib/server-fetch';
 import SettingsUI from '@/components/features/settings/SettingsUI';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SettingsPage() {
   try {
     const res = await serverFetch('/user/profile');
