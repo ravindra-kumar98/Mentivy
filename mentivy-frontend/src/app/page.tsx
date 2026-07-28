@@ -4,7 +4,7 @@ import { ArrowRight, Brain, CalendarDays, BarChart3, CheckCircle } from 'lucide-
 const features = [
   {
     icon: Brain,
-    title: 'AI Powered Guidance',
+    title: 'AI-Powered Guidance',
     description: 'Our engine analyzes your performance and builds a personalized daily plan so you always know what to study next.',
     color: 'text-indigo-500',
     bg: 'bg-indigo-50',
