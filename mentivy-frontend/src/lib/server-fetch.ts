@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { API_BASE_URL } from '@/lib/config';
 
 /**
  * A server-side fetch helper that forwards the session cookies 
@@ -7,8 +8,6 @@ import { cookies } from 'next/headers';
 export async function serverFetch(endpoint: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refreshToken')?.value;
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
   
   const headers = new Headers(options.headers);
   if (refreshToken) {
@@ -16,7 +15,7 @@ export async function serverFetch(endpoint: string, options: RequestInit = {}) {
   }
   headers.set('Content-Type', 'application/json');
 
-  const response = await fetch(`${baseUrl}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,
     // Ensure we don't cache personalized data
