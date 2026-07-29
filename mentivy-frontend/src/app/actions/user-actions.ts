@@ -3,14 +3,13 @@
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1';
+import { API_BASE_URL } from '@/lib/config';
 
 async function serverActionRequest(endpoint: string, method: string, body?: any) {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
-  const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method,
     headers: {
       'Content-Type': 'application/json',

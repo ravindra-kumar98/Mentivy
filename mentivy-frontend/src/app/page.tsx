@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Brain, CalendarDays, BarChart3, CheckCircle } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/config';
 
 const features = [
   {
@@ -25,14 +26,41 @@ const features = [
   },
 ];
 
-const stats = [
-  { label: 'Students Enrolled', value: '12,000+' },
-  { label: 'Questions Practised', value: '4.2M+' },
-  { label: 'Exams Covered', value: '35+' },
-  { label: 'Avg. Score Improvement', value: '23%' },
-];
+function formatCount(num: number): string {
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M+`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}k+`;
+  return `${num}+`;
+}
 
-export default function LandingPage() {
+async function getLandingStats() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/public/stats`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    return null;
+  }
+}
+
+export default async function LandingPage() {
+  const data = await getLandingStats();
+  const statsData = data || {
+    totalStudents: 0,
+    totalQuestions: 0,
+    totalTopics: 0,
+    totalAttempts: 0,
+    avgAccuracy: 0,
+  };
+
+  const stats = [
+    { label: 'Students Enrolled', value: formatCount(statsData.totalStudents) },
+    { label: 'Questions Practised', value: formatCount(statsData.totalAttempts) },
+    { label: 'Exams Covered', value: `${statsData.totalTopics}+` },
+    { label: 'Avg. Accuracy Rate', value: `${statsData.avgAccuracy}%` },
+  ];
   return (
     <div className="min-h-screen bg-white font-sans flex flex-col">
 

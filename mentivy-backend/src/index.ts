@@ -12,6 +12,7 @@ import questionRoutes from './interfaces/routes/question.routes';
 import analyticsRoutes from './interfaces/routes/analytics.routes';
 import userRoutes from './interfaces/routes/user.routes';
 import adminRoutes from './interfaces/routes/admin.routes';
+import publicRoutes from './interfaces/routes/public.routes';
 dotenv.config();
 
 const app = express();
@@ -53,6 +54,7 @@ app.use('/api/v1/questions', questionRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/public', publicRoutes);
 
 // Global error handler
 app.use((err: any, req: Request, res: Response, next: any) => {
