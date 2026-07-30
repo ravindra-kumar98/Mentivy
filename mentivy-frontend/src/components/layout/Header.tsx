@@ -24,7 +24,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
         <h1 className="text-xl font-semibold text-slate-800 hidden sm:block">
           Welcome back
-          {user?.email && <span className="text-slate-500 font-normal">, {user.email.split('@')[0]}</span>}
+          {(user?.fullName || user?.email) && (
+            <span className="text-slate-500 font-normal">, {user?.fullName || user?.email?.split('@')[0]}</span>
+          )}
         </h1>
       </div>
 
