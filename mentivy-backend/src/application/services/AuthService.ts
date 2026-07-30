@@ -33,6 +33,7 @@ export class AuthService {
 
         // Create User Entity
         const user = await UserModel.create({
+            fullName: data.fullName || data.email.split('@')[0],
             email: data.email,
             passwordHash,
             role: data.role || 'STUDENT',
@@ -43,8 +44,10 @@ export class AuthService {
         await UserProfileModel.create({
             userId: user._id.toString(),
             targetExam: 'UNKNOWN',
+            targetYear: 2026,
             dailyTimeAvailability: 120,
-            currentLevel: 'BEGINNER'
+            currentLevel: 'BEGINNER',
+            preferredLanguage: 'English'
         });
 
         const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
@@ -54,6 +57,7 @@ export class AuthService {
         return { 
             user: { 
                 id: user._id, 
+                fullName: user.fullName,
                 email: user.email, 
                 role: user.role,
                 needsOnboarding 
@@ -81,6 +85,7 @@ export class AuthService {
         return { 
             user: { 
                 id: user._id, 
+                fullName: user.fullName,
                 email: user.email, 
                 role: user.role,
                 needsOnboarding 
@@ -107,6 +112,7 @@ export class AuthService {
             return { 
                 user: { 
                     id: user._id, 
+                    fullName: user.fullName,
                     email: user.email, 
                     role: user.role,
                     needsOnboarding 
