@@ -43,10 +43,16 @@ export default function OnboardingUI() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-12">
+
+      {/* Header Brand */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-primary-600 tracking-tight">Mentivy</h1>
+        <p className="text-slate-500 text-sm mt-1">Your personalized guidance system</p>
+      </div>
 
       {/* Progress Bar */}
-      <div className="w-full mb-12 flex gap-2">
+      <div className="w-full max-w-2xl mb-8 flex gap-2">
         {[1, 2, 3].map((s) => (
           <div
             key={s}
