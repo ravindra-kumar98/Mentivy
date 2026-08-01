@@ -27,6 +27,15 @@ const loginSchema = z.object({
 // @route   POST /api/v1/auth/register
 router.post('/register', validateRequest(registerSchema), AuthController.register);
 
+// @route   POST /api/v1/auth/verify-email
+router.post('/verify-email', AuthController.verifyEmail);
+
+// @route   POST /api/v1/auth/resend-otp
+router.post('/resend-otp', AuthController.resendOtp);
+
+// @route   POST /api/v1/auth/google
+router.post('/google', AuthController.googleAuth);
+
 // @route   POST /api/v1/auth/login
 router.post('/login', validateRequest(loginSchema), AuthController.login);
 
