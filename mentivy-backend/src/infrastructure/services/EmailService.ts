@@ -7,23 +7,36 @@ if (dns.setDefaultResultOrder) {
 }
 
 export class EmailService {
-    private static getTransporter() {
+    private static async getTransporter() {
         const port = parseInt(process.env.SMTP_PORT || '465');
         const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
+        let host = process.env.SMTP_HOST || 'smtp.gmail.com';
+
+        // Dynamically resolve domain to explicit IPv4 IP address (eliminates Render IPv6 ENETUNREACH errors)
+        if (host === 'smtp.gmail.com') {
+            try {
+                const ipv4Addresses = await dns.promises.resolve4('smtp.gmail.com');
+                if (ipv4Addresses && ipv4Addresses.length > 0) {
+                    host = ipv4Addresses[0];
+                }
+            } catch (err) {
+                // Fallback to hostname if DNS resolve fails
+            }
+        }
 
         return nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            host: host,
             port: port,
             secure: isSecure,
-            family: 4, // Force IPv4 connection to bypass Render IPv6 ENETUNREACH error
-            lookup: (hostname: string, options: any, callback: any) => {
-                dns.lookup(hostname, { family: 4 }, callback);
-            },
             auth: {
                 user: process.env.SMTP_USER || '',
                 pass: process.env.SMTP_PASS || '',
             },
-            connectionTimeout: 10000, // 10 seconds max connection timeout
+            tls: {
+                servername: 'smtp.gmail.com', // Ensures SSL SNI certificate validation works with IP address
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 10000,
             greetingTimeout: 5000,
             socketTimeout: 10000,
         } as any);
@@ -42,7 +55,7 @@ export class EmailService {
         console.log(`[EmailService] Sending verification email to ${toEmail}...`);
 
         try {
-            const transporter = this.getTransporter();
+            const transporter = await this.getTransporter();
             await transporter.sendMail({
                 from: `"Mentivy Guidance" <${process.env.SMTP_USER}>`,
                 to: toEmail,
