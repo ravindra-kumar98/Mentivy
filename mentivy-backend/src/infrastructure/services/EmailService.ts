@@ -1,4 +1,10 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Force Node.js DNS resolver to prioritize IPv4 addresses over IPv6 (fixes Render ENETUNREACH IPv6 error)
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 
 export class EmailService {
     private static getTransporter() {
@@ -9,6 +15,7 @@ export class EmailService {
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: port,
             secure: isSecure,
+            family: 4, // Force IPv4 connection to bypass Render IPv6 ENETUNREACH error
             auth: {
                 user: process.env.SMTP_USER || '',
                 pass: process.env.SMTP_PASS || '',
@@ -16,7 +23,7 @@ export class EmailService {
             connectionTimeout: 10000, // 10 seconds max connection timeout
             greetingTimeout: 5000,
             socketTimeout: 10000,
-        });
+        } as any);
     }
 
     static async sendOtpEmail(toEmail: string, fullName: string, otp: string): Promise<boolean> {
