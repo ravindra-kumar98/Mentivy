@@ -81,6 +81,24 @@ export async function registerUser(data: any) {
   }
 }
 
+export async function verifyEmailAction(data: { email: string; otp: string }) {
+  try {
+    const result = await serverActionRequest('/auth/verify-email', 'POST', data);
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function resendOtpAction(data: { email: string }) {
+  try {
+    const result = await serverActionRequest('/auth/resend-otp', 'POST', data);
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function loginUser(data: any) {
   try {
     const result = await serverActionRequest('/auth/login', 'POST', data);
@@ -89,5 +107,15 @@ export async function loginUser(data: any) {
     return { success: false, error: error.message };
   }
 }
+
+export async function googleAuthAction(credential: string) {
+  try {
+    const result = await serverActionRequest('/auth/google', 'POST', { credential });
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 
 
