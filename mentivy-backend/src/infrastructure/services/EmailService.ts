@@ -2,14 +2,20 @@ import nodemailer from 'nodemailer';
 
 export class EmailService {
     private static getTransporter() {
+        const port = parseInt(process.env.SMTP_PORT || '465');
+        const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
+
         return nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: process.env.SMTP_SECURE === 'true',
+            port: port,
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_USER || '',
                 pass: process.env.SMTP_PASS || '',
             },
+            connectionTimeout: 10000, // 10 seconds max connection timeout
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
         });
     }
 
