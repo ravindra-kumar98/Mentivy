@@ -16,6 +16,9 @@ export class EmailService {
             port: port,
             secure: isSecure,
             family: 4, // Force IPv4 connection to bypass Render IPv6 ENETUNREACH error
+            lookup: (hostname: string, options: any, callback: any) => {
+                dns.lookup(hostname, { family: 4 }, callback);
+            },
             auth: {
                 user: process.env.SMTP_USER || '',
                 pass: process.env.SMTP_PASS || '',
