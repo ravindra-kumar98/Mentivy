@@ -1,91 +1,72 @@
-import nodemailer from 'nodemailer';
-import dns from 'dns';
-
-// Force Node.js DNS resolver to prioritize IPv4 addresses over IPv6 (fixes Render ENETUNREACH IPv6 error)
-if (dns.setDefaultResultOrder) {
-    dns.setDefaultResultOrder('ipv4first');
-}
-
 export class EmailService {
-    private static async getTransporter() {
-        const port = parseInt(process.env.SMTP_PORT || '465');
-        const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
-        let host = process.env.SMTP_HOST || 'smtp.gmail.com';
-
-        // Dynamically resolve domain to explicit IPv4 IP address (eliminates Render IPv6 ENETUNREACH errors)
-        if (host === 'smtp.gmail.com') {
-            try {
-                const ipv4Addresses = await dns.promises.resolve4('smtp.gmail.com');
-                if (ipv4Addresses && ipv4Addresses.length > 0) {
-                    host = ipv4Addresses[0];
-                }
-            } catch (err) {
-                // Fallback to hostname if DNS resolve fails
-            }
-        }
-
-        return nodemailer.createTransport({
-            host: host,
-            port: port,
-            secure: isSecure,
-            auth: {
-                user: process.env.SMTP_USER || '',
-                pass: process.env.SMTP_PASS || '',
-            },
-            tls: {
-                servername: 'smtp.gmail.com', // Ensures SSL SNI certificate validation works with IP address
-                rejectUnauthorized: false
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 5000,
-            socketTimeout: 10000,
-        } as any);
-    }
-
     static async sendOtpEmail(toEmail: string, fullName: string, otp: string): Promise<boolean> {
-        const smtpUser = process.env.SMTP_USER;
-        const smtpPass = process.env.SMTP_PASS;
-        const isConfigured = !!smtpUser && !!smtpPass;
+        const apiKey = process.env.BREVO_API_KEY;
+        const senderEmail = process.env.SENDER_EMAIL || 'info.mentivy@gmail.com';
 
-        if (!isConfigured) {
-            console.log(`\n[DEV MODE] SMTP not configured. OTP for ${toEmail}: ${otp}`);
+        if (!apiKey) {
+            console.log(`\n==================================================`);
+            console.log(`[DEV MODE] BREVO_API_KEY not set. OTP for ${toEmail}: ${otp}`);
+            console.log(`==================================================\n`);
             return true;
         }
 
-        console.log(`[EmailService] Sending verification email to ${toEmail}...`);
+        console.log(`[EmailService] Sending 6-digit OTP email to ${toEmail} via Brevo HTTPS API...`);
+
+        const htmlContent = `
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px; background-color: #f8fafc; border-radius: 16px;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800;">Mentivy</h1>
+                    <p style="color: #64748b; margin-top: 4px; font-size: 14px;">Your Personalized Guidance Engine</p>
+                </div>
+                <div style="background-color: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
+                    <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Welcome to Mentivy, ${fullName}!</h2>
+                    <p style="color: #475569; font-size: 14px; line-height: 1.6;">
+                        Please use the 6-digit verification code below to verify your email address and activate your account.
+                    </p>
+                    <div style="margin: 28px 0; padding: 16px; background-color: #eef2ff; border-radius: 12px; border: 1px solid #c7d2fe;">
+                        <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #4338ca;">${otp}</span>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
+                        This code is valid for 10 minutes. If you did not request this code, please ignore this email.
+                    </p>
+                </div>
+            </div>
+        `;
 
         try {
-            const transporter = await this.getTransporter();
-            await transporter.sendMail({
-                from: `"Mentivy Guidance" <${process.env.SMTP_USER}>`,
-                to: toEmail,
-                subject: `${otp} is your Mentivy Email Verification PIN`,
-                html: `
-                    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px; background-color: #f8fafc; border-radius: 16px;">
-                        <div style="text-align: center; margin-bottom: 24px;">
-                            <h1 style="color: #4f46e5; margin: 0; font-size: 28px; font-weight: 800;">Mentivy</h1>
-                            <p style="color: #64748b; margin-top: 4px; font-size: 14px;">Your Personalized Guidance Engine</p>
-                        </div>
-                        <div style="background-color: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid #e2e8f0; text-align: center;">
-                            <h2 style="color: #0f172a; margin-top: 0; font-size: 20px;">Welcome to Mentivy, ${fullName}!</h2>
-                            <p style="color: #475569; font-size: 14px; line-height: 1.6;">
-                                Please use the 6-digit verification code below to verify your email address and activate your account.
-                            </p>
-                            <div style="margin: 28px 0; padding: 16px; background-color: #eef2ff; border-radius: 12px; border: 1px border #c7d2fe;">
-                                <span style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #4338ca;">${otp}</span>
-                            </div>
-                            <p style="color: #94a3b8; font-size: 12px; margin-bottom: 0;">
-                                This code is valid for 10 minutes. If you did not request this code, please ignore this email.
-                            </p>
-                        </div>
-                    </div>
-                `,
+            const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'api-key': apiKey,
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    sender: {
+                        name: 'Mentivy Guidance',
+                        email: senderEmail
+                    },
+                    to: [
+                        {
+                            email: toEmail,
+                            name: fullName
+                        }
+                    ],
+                    subject: `${otp} is your Mentivy Email Verification PIN`,
+                    htmlContent: htmlContent
+                })
             });
-            console.log(`[EmailService] Verification OTP successfully sent to ${toEmail}`);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error(`[EmailService] Brevo API Error (${response.status}):`, errorData);
+                return true;
+            }
+
+            console.log(`[EmailService] Verification OTP successfully sent to ${toEmail} via Brevo!`);
             return true;
         } catch (error) {
-            console.error(`[EmailService] Failed to send email via SMTP:`, error);
-            // Return true so user can still test with console logged OTP
+            console.error(`[EmailService] Failed to send email via Brevo HTTPS API:`, error);
             return true;
         }
     }

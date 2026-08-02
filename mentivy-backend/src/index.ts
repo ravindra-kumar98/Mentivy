@@ -14,14 +14,9 @@ import userRoutes from './interfaces/routes/user.routes';
 import adminRoutes from './interfaces/routes/admin.routes';
 import publicRoutes from './interfaces/routes/public.routes';
 
-import nodemailer from 'nodemailer'; // <-- Add this temporary
-
 dotenv.config();
 
 const app = express();
-
-// temporary 
-app.set('trust proxy', 1);
 
 const PORT = process.env.PORT || 5001;
 
@@ -53,32 +48,6 @@ app.get('/health', (req: Request, res: Response) => {
 // Basic welcome route
 app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to Mentivy API' });
-});
-
-// ADD THIS HERE temporary
-app.get('/smtp-test', async (_, res) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        });
-
-        await transporter.verify();
-
-        res.json({
-            success: true,
-            message: "SMTP Connected"
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json(err);
-    }
 });
 
 // API Routes
