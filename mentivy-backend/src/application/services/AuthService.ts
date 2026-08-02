@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { UserModel } from '../../infrastructure/database/models/UserModel';
+import { PendingUserModel } from '../../infrastructure/database/models/PendingUserModel';
 import { UserProfileModel } from '../../infrastructure/database/models/UserProfileModel';
 import { EmailService } from '../../infrastructure/services/EmailService';
 
@@ -29,86 +30,84 @@ export class AuthService {
     }
 
     static async register(data: any) {
-        // Check if user already exists
-        const existingUser = await UserModel.findOne({ email: data.email.toLowerCase() });
-        if (existingUser) {
-            if (existingUser.isEmailVerified) {
-                throw new Error('User already exists');
-            } else {
-                // User exists but is unverified, regenerate OTP and update password/name
-                const salt = await bcrypt.genSalt(10);
-                const passwordHash = await bcrypt.hash(data.password, salt);
-                const otp = this.generateOtp();
-                const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const email = data.email.toLowerCase();
 
-                existingUser.fullName = data.fullName || existingUser.fullName;
-                existingUser.passwordHash = passwordHash;
-                existingUser.phoneNumber = data.phoneNumber || existingUser.phoneNumber;
-                existingUser.emailOtp = otp;
-                existingUser.emailOtpExpiresAt = otpExpiresAt;
-                await existingUser.save();
-
-                await EmailService.sendOtpEmail(existingUser.email, existingUser.fullName || 'Student', otp);
-                return { needsVerification: true, email: existingUser.email };
-            }
+        // 1. Check if user already exists and is verified in main Users collection
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser && existingUser.isEmailVerified) {
+            throw new Error('User already exists');
         }
 
-        // Hash password
+        // 2. Hash password & generate 6-digit OTP
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(data.password, salt);
         const otp = this.generateOtp();
         const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        // Create User Entity
-        const user = await UserModel.create({
-            fullName: data.fullName || data.email.split('@')[0],
-            email: data.email.toLowerCase(),
-            passwordHash,
-            role: data.role || 'STUDENT',
-            phoneNumber: data.phoneNumber,
-            isEmailVerified: false,
-            emailOtp: otp,
-            emailOtpExpiresAt: otpExpiresAt
-        });
+        // 3. Upsert into temporary PendingUserModel (overwrites if unverified attempt exists within 10m window)
+        const pendingUser = await PendingUserModel.findOneAndUpdate(
+            { email },
+            {
+                fullName: data.fullName || email.split('@')[0],
+                email,
+                passwordHash,
+                phoneNumber: data.phoneNumber,
+                emailOtp: otp,
+                emailOtpExpiresAt: otpExpiresAt,
+                createdAt: new Date() // Resets 10-minute TTL expiry timer
+            },
+            { upsert: true, returnDocument: 'after' }
+        );
 
-        // Send Email Verification OTP
-        await EmailService.sendOtpEmail(user.email, user.fullName || 'Student', otp);
+        // 4. Send 6-Digit OTP Email
+        await EmailService.sendOtpEmail(pendingUser.email, pendingUser.fullName || 'Student', otp);
 
-        return { needsVerification: true, email: user.email };
+        return { needsVerification: true, email: pendingUser.email };
     }
 
     static async verifyEmail(email: string, otp: string) {
-        const user = await UserModel.findOne({ email: email.toLowerCase() });
-        if (!user) {
-            throw new Error('User account not found');
-        }
+        const normalizedEmail = email.toLowerCase();
 
-        if (user.isEmailVerified) {
-            // Already verified
-            const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
+        // 1. Check if user is already verified in main Users collection
+        const verifiedUser = await UserModel.findOne({ email: normalizedEmail });
+        if (verifiedUser && verifiedUser.isEmailVerified) {
+            const profile = await UserProfileModel.findOne({ userId: verifiedUser._id.toString() });
             const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
-            const tokens = this.generateTokens(user._id.toString(), user.role);
+            const tokens = this.generateTokens(verifiedUser._id.toString(), verifiedUser.role);
             return {
-                user: { id: user._id, fullName: user.fullName, email: user.email, role: user.role, needsOnboarding },
+                user: { id: verifiedUser._id, fullName: verifiedUser.fullName, email: verifiedUser.email, role: verifiedUser.role, needsOnboarding },
                 ...tokens
             };
         }
 
-        if (!user.emailOtp || user.emailOtp !== otp.trim()) {
+        // 2. Find pending registration in PendingUserModel
+        const pendingUser = await PendingUserModel.findOne({ email: normalizedEmail });
+        if (!pendingUser) {
+            throw new Error('Verification session expired or account not found. Please register again.');
+        }
+
+        if (!pendingUser.emailOtp || pendingUser.emailOtp !== otp.trim()) {
             throw new Error('Invalid 6-digit verification code');
         }
 
-        if (user.emailOtpExpiresAt && user.emailOtpExpiresAt < new Date()) {
-            throw new Error('Verification code has expired. Please request a new one.');
+        if (pendingUser.emailOtpExpiresAt && pendingUser.emailOtpExpiresAt < new Date()) {
+            throw new Error('Verification code has expired. Please request a new code.');
         }
 
-        // Mark as verified
-        user.isEmailVerified = true;
-        user.emailOtp = undefined;
-        user.emailOtpExpiresAt = undefined;
-        await user.save();
+        // 3. Create permanent verified account in main UserModel
+        const user = await UserModel.create({
+            fullName: pendingUser.fullName,
+            email: pendingUser.email,
+            passwordHash: pendingUser.passwordHash,
+            role: 'STUDENT',
+            phoneNumber: pendingUser.phoneNumber,
+            isEmailVerified: true
+        });
 
-        // Create UserProfile mapping if not present
+        // 4. Delete pending registration document from PendingUserModel
+        await PendingUserModel.deleteOne({ _id: pendingUser._id });
+
+        // 5. Create UserProfile mapping
         let profile = await UserProfileModel.findOne({ userId: user._id.toString() });
         if (!profile) {
             profile = await UserProfileModel.create({
@@ -138,61 +137,78 @@ export class AuthService {
     }
 
     static async resendOtp(email: string) {
-        const user = await UserModel.findOne({ email: email.toLowerCase() });
-        if (!user) {
-            throw new Error('User not found');
-        }
+        const normalizedEmail = email.toLowerCase();
 
-        if (user.isEmailVerified) {
+        // 1. Check if already verified
+        const verifiedUser = await UserModel.findOne({ email: normalizedEmail });
+        if (verifiedUser && verifiedUser.isEmailVerified) {
             throw new Error('Email is already verified');
         }
 
-        const otp = this.generateOtp();
-        user.emailOtp = otp;
-        user.emailOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await user.save();
+        // 2. Check pending registration
+        const pendingUser = await PendingUserModel.findOne({ email: normalizedEmail });
+        if (!pendingUser) {
+            throw new Error('Verification session expired. Please register again.');
+        }
 
-        await EmailService.sendOtpEmail(user.email, user.fullName || 'Student', otp);
-        return { success: true, email: user.email };
+        const otp = this.generateOtp();
+        pendingUser.emailOtp = otp;
+        pendingUser.emailOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+        pendingUser.createdAt = new Date(); // Reset 10-minute TTL
+        await pendingUser.save();
+
+        await EmailService.sendOtpEmail(pendingUser.email, pendingUser.fullName || 'Student', otp);
+        return { success: true, email: pendingUser.email };
     }
 
     static async login(data: any) {
-        const user = await UserModel.findOne({ email: data.email.toLowerCase() });
-        if (!user || !user.passwordHash) {
-            throw new Error('Invalid email or password');
+        const normalizedEmail = data.email.toLowerCase();
+
+        // 1. Check main verified Users collection
+        const user = await UserModel.findOne({ email: normalizedEmail });
+        if (user && user.passwordHash) {
+            const isMatch = await bcrypt.compare(data.password, user.passwordHash);
+            if (!isMatch) {
+                throw new Error('Invalid email or password');
+            }
+
+            const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
+            const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
+
+            const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
+            return { 
+                user: { 
+                    id: user._id, 
+                    fullName: user.fullName,
+                    email: user.email, 
+                    role: user.role,
+                    needsOnboarding 
+                }, 
+                accessToken, 
+                refreshToken 
+            };
         }
 
-        const isMatch = await bcrypt.compare(data.password, user.passwordHash);
-        if (!isMatch) {
-            throw new Error('Invalid email or password');
-        }
+        // 2. If not found in main Users, check temporary PendingUserModel (unverified signup within 10m window)
+        const pendingUser = await PendingUserModel.findOne({ email: normalizedEmail });
+        if (pendingUser) {
+            const isMatch = await bcrypt.compare(data.password, pendingUser.passwordHash);
+            if (!isMatch) {
+                throw new Error('Invalid email or password');
+            }
 
-        if (!user.isEmailVerified) {
-            // Send new OTP and notify frontend to open verification modal
+            // Password matches: generate new OTP, update pending user, and redirect to OTP verification modal
             const otp = this.generateOtp();
-            user.emailOtp = otp;
-            user.emailOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-            await user.save();
-            await EmailService.sendOtpEmail(user.email, user.fullName || 'Student', otp);
+            pendingUser.emailOtp = otp;
+            pendingUser.emailOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+            pendingUser.createdAt = new Date(); // Reset 10m TTL
+            await pendingUser.save();
 
-            return { needsVerification: true, email: user.email };
+            await EmailService.sendOtpEmail(pendingUser.email, pendingUser.fullName || 'Student', otp);
+            return { needsVerification: true, email: pendingUser.email };
         }
 
-        const profile = await UserProfileModel.findOne({ userId: user._id.toString() });
-        const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
-
-        const { accessToken, refreshToken } = this.generateTokens(user._id.toString(), user.role);
-        return { 
-            user: { 
-                id: user._id, 
-                fullName: user.fullName,
-                email: user.email, 
-                role: user.role,
-                needsOnboarding 
-            }, 
-            accessToken, 
-            refreshToken 
-        };
+        throw new Error('Invalid email or password');
     }
 
     static async googleAuth(credential: string) {
