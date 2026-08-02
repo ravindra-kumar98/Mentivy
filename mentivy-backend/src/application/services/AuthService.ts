@@ -316,4 +316,66 @@ export class AuthService {
             throw new Error('Invalid refresh token');
         }
     }
+
+    static async forgotPassword(email: string) {
+        const normalizedEmail = email.toLowerCase();
+        const user = await UserModel.findOne({ email: normalizedEmail });
+        
+        if (!user || !user.isEmailVerified) {
+            throw new Error('No active account found with this email');
+        }
+
+        const otp = this.generateOtp();
+        user.resetPasswordOtp = otp;
+        user.resetPasswordOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        await user.save();
+
+        await EmailService.sendPasswordResetEmail(user.email, user.fullName || 'Student', otp);
+        return { success: true, email: user.email };
+    }
+
+    static async resetPassword(data: any) {
+        const normalizedEmail = (data.email || '').toLowerCase();
+        const otp = (data.otp || '').trim();
+        const newPassword = data.newPassword || '';
+
+        const user = await UserModel.findOne({ email: normalizedEmail });
+        if (!user) {
+            throw new Error('Account not found');
+        }
+
+        if (!user.resetPasswordOtp || user.resetPasswordOtp !== otp) {
+            throw new Error('Invalid 6-digit password reset code');
+        }
+
+        if (user.resetPasswordOtpExpiresAt && user.resetPasswordOtpExpiresAt < new Date()) {
+            throw new Error('Password reset code has expired. Please request a new code.');
+        }
+
+        // Validate password complexity
+        if (newPassword.length < 6) {
+            throw new Error('Password must be at least 6 characters long');
+        }
+        if (!/[A-Z]/.test(newPassword)) {
+            throw new Error('Password must contain at least one uppercase letter');
+        }
+        if (!/[a-z]/.test(newPassword)) {
+            throw new Error('Password must contain at least one lowercase letter');
+        }
+        if (!/[0-9]/.test(newPassword)) {
+            throw new Error('Password must contain at least one number');
+        }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
+            throw new Error('Password must contain at least one special character');
+        }
+
+        // Hash new password & clear reset OTP fields
+        const salt = await bcrypt.genSalt(10);
+        user.passwordHash = await bcrypt.hash(newPassword, salt);
+        user.resetPasswordOtp = undefined;
+        user.resetPasswordOtpExpiresAt = undefined;
+        await user.save();
+
+        return { success: true, message: 'Password reset successfully' };
+    }
 }

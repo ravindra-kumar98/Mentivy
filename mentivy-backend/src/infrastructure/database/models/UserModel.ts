@@ -13,7 +13,9 @@ const UserSchema = new Schema<IUserDocument>({
     googleId: { type: String, sparse: true },
     isEmailVerified: { type: Boolean, default: false },
     emailOtp: { type: String },
-    emailOtpExpiresAt: { type: Date }
+    emailOtpExpiresAt: { type: Date },
+    resetPasswordOtp: { type: String },
+    resetPasswordOtpExpiresAt: { type: Date }
 }, { 
     timestamps: true 
 });

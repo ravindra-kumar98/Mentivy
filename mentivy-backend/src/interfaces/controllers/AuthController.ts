@@ -202,4 +202,42 @@ export class AuthController {
         res.clearCookie('needsOnboarding', { ...cookieOptions, httpOnly: false });
         res.status(200).json({ success: true, message: 'Logged out successfully' });
     }
+
+    static async forgotPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                res.status(400).json({ success: false, message: 'Email address is required' });
+                return;
+            }
+
+            const result = await AuthService.forgotPassword(email);
+            res.status(200).json({
+                success: true,
+                message: 'Password reset code sent to email',
+                data: result
+            });
+        } catch (error: any) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
+
+    static async resetPassword(req: Request, res: Response): Promise<void> {
+        try {
+            const { email, otp, newPassword } = req.body;
+            if (!email || !otp || !newPassword) {
+                res.status(400).json({ success: false, message: 'Email, 6-digit PIN, and new password are required' });
+                return;
+            }
+
+            const result = await AuthService.resetPassword(req.body);
+            res.status(200).json({
+                success: true,
+                message: 'Password reset successfully',
+                data: result
+            });
+        } catch (error: any) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 }

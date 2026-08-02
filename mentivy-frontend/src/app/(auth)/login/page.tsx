@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/Label';
 import { useAuthStore } from '@/store/useAuthStore';
 import { loginUser, googleAuthAction } from '@/app/actions/user-actions';
 import EmailVerificationModal from '@/components/features/auth/EmailVerificationModal';
+import { ForgotPasswordModal } from '@/components/features/auth/ForgotPasswordModal';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,6 +27,9 @@ export default function LoginPage() {
   // Email Verification Modal state for unverified accounts
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');
+
+  // Forgot Password Modal state
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -89,6 +93,13 @@ export default function LoginPage() {
         }}
       />
 
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+        initialEmail={formData.email}
+      />
+
       <div className="space-y-4">
         {error && (
           <div className="p-3 rounded bg-red-50 text-red-600 text-sm border border-red-200">
@@ -138,7 +149,13 @@ export default function LoginPage() {
               <Label htmlFor="password">
                 Password <span className="text-red-500">*</span>
               </Label>
-              <a href="#" className="text-xs text-primary-600 hover:underline">Forgot?</a>
+              <button
+                type="button"
+                onClick={() => setIsForgotPasswordOpen(true)}
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 hover:underline focus:outline-none"
+              >
+                Forgot?
+              </button>
             </div>
             <div className="relative">
               <Input 

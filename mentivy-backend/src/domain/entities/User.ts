@@ -10,6 +10,8 @@ export interface User {
     isEmailVerified?: boolean;
     emailOtp?: string;
     emailOtpExpiresAt?: Date;
+    resetPasswordOtp?: string;
+    resetPasswordOtpExpiresAt?: Date;
     createdAt?: Date;
     updatedAt?: Date;
 }
