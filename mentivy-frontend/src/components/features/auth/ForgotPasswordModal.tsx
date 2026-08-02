@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Mail, KeyRound, Eye, EyeOff, CheckCircle2, ArrowLeft, RefreshCw, X, AlertCircle, Info, ShieldCheck } from 'lucide-react';
 import { forgotPasswordAction, resetPasswordAction } from '@/app/actions/user-actions';
 
@@ -12,6 +13,7 @@ interface ForgotPasswordModalProps {
 }
 
 export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSuccess }: ForgotPasswordModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Email, 2: OTP + New Password, 3: Success
   const [email, setEmail] = useState(initialEmail);
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
@@ -26,6 +28,10 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (initialEmail) setEmail(initialEmail);
   }, [initialEmail]);
 
@@ -36,7 +42,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Password criteria check
   const passwordCriteria = {
@@ -170,13 +176,13 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           onClick={handleCloseModal}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -185,7 +191,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {step === 1 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50 mx-auto">
                 <KeyRound className="w-7 h-7" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Forgot Password?</h2>
@@ -222,7 +228,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -241,12 +247,12 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {step === 2 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50 mx-auto">
                 <ShieldCheck className="w-7 h-7" />
               </div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Reset Your Password</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Enter the 6-digit PIN sent to <strong className="text-slate-700 dark:text-slate-300">{email}</strong> and create your new password.
+                Enter the 6-digit PIN sent to <strong className="text-slate-700 dark:text-slate-300 break-all">{email}</strong> and create your new password.
               </p>
             </div>
 
@@ -282,7 +288,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                    className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium hover:underline cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Change Email</span>
@@ -292,7 +298,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                     type="button"
                     onClick={handleResendCode}
                     disabled={resendCooldown > 0 || isLoading}
-                    className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline disabled:opacity-50 disabled:no-underline"
+                    className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline cursor-pointer disabled:opacity-50 disabled:no-underline"
                   >
                     {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend PIN'}
                   </button>
@@ -305,37 +311,44 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     New Password
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPasswordTooltip(!showPasswordTooltip)}
-                    className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
-                  >
-                    <Info className="w-4 h-4" />
-                  </button>
-                </div>
+                  
+                  {/* Password Info Floating Tooltip Trigger */}
+                  <div className="relative inline-block">
+                    <button
+                      type="button"
+                      onMouseEnter={() => setShowPasswordTooltip(true)}
+                      onMouseLeave={() => setShowPasswordTooltip(false)}
+                      onClick={() => setShowPasswordTooltip(!showPasswordTooltip)}
+                      className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
 
-                {showPasswordTooltip && (
-                  <div className="p-3 mb-2 bg-slate-900 text-white text-xs rounded-xl shadow-xl space-y-1">
-                    <p className="font-semibold text-slate-300">Password Criteria:</p>
-                    <div className="grid grid-cols-2 gap-1 text-[11px]">
-                      <span className={passwordCriteria.length ? 'text-emerald-400' : 'text-slate-400'}>
-                        {passwordCriteria.length ? '✓' : '•'} Min 6 chars
-                      </span>
-                      <span className={passwordCriteria.uppercase ? 'text-emerald-400' : 'text-slate-400'}>
-                        {passwordCriteria.uppercase ? '✓' : '•'} Uppercase (A-Z)
-                      </span>
-                      <span className={passwordCriteria.lowercase ? 'text-emerald-400' : 'text-slate-400'}>
-                        {passwordCriteria.lowercase ? '✓' : '•'} Lowercase (a-z)
-                      </span>
-                      <span className={passwordCriteria.number ? 'text-emerald-400' : 'text-slate-400'}>
-                        {passwordCriteria.number ? '✓' : '•'} Number (0-9)
-                      </span>
-                      <span className={passwordCriteria.special ? 'text-emerald-400' : 'text-slate-400'}>
-                        {passwordCriteria.special ? '✓' : '•'} Special char (!@#$)
-                      </span>
-                    </div>
+                    {/* Floating Tooltip */}
+                    {showPasswordTooltip && (
+                      <div className="absolute right-0 bottom-full mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-2xl border border-slate-700 z-50 animate-in fade-in zoom-in-95 pointer-events-none">
+                        <p className="font-semibold text-slate-300 mb-1.5">Password Requirements:</p>
+                        <div className="grid grid-cols-1 gap-1 text-[11px]">
+                          <span className={passwordCriteria.length ? 'text-emerald-400' : 'text-slate-400'}>
+                            {passwordCriteria.length ? '✓' : '•'} Min 6 characters
+                          </span>
+                          <span className={passwordCriteria.uppercase ? 'text-emerald-400' : 'text-slate-400'}>
+                            {passwordCriteria.uppercase ? '✓' : '•'} At least 1 uppercase (A-Z)
+                          </span>
+                          <span className={passwordCriteria.lowercase ? 'text-emerald-400' : 'text-slate-400'}>
+                            {passwordCriteria.lowercase ? '✓' : '•'} At least 1 lowercase (a-z)
+                          </span>
+                          <span className={passwordCriteria.number ? 'text-emerald-400' : 'text-slate-400'}>
+                            {passwordCriteria.number ? '✓' : '•'} At least 1 number (0-9)
+                          </span>
+                          <span className={passwordCriteria.special ? 'text-emerald-400' : 'text-slate-400'}>
+                            {passwordCriteria.special ? '✓' : '•'} At least 1 special char (!@#$)
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
 
                 <div className="relative">
                   <input
@@ -349,7 +362,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -359,7 +372,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
               <button
                 type="submit"
                 disabled={isLoading || !isPasswordValid}
-                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -377,7 +390,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {/* STEP 3: SUCCESS CONFIRMATION */}
         {step === 3 && (
           <div className="text-center space-y-6 py-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 mx-auto">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
@@ -390,7 +403,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
 
             <button
               onClick={handleCloseModal}
-              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition duration-200"
+              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200"
             >
               Back to Sign In
             </button>
@@ -399,4 +412,6 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

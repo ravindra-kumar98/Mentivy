@@ -84,7 +84,7 @@ export default function OnboardingUI() {
                   <button
                     key={exam}
                     onClick={() => setData({ ...data, targetExam: exam })}
-                    className={`p-6 rounded-3xl border-2 transition-all text-left group ${data.targetExam === exam
+                    className={`p-6 rounded-3xl border-2 transition-all text-left group cursor-pointer ${data.targetExam === exam
                       ? 'border-primary-600 bg-primary-50 ring-4 ring-primary-50'
                       : 'border-slate-100 hover:border-slate-200'
                       }`}
@@ -108,8 +108,8 @@ export default function OnboardingUI() {
                       key={year}
                       type="button"
                       onClick={() => setData({ ...data, targetYear: year })}
-                      className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-colors ${data.targetYear === year
-                        ? 'border-primary-600 bg-primary-60 text-primary-700'
+                      className={`flex-1 py-3 rounded-xl border text-sm font-bold cursor-pointer transition-colors ${data.targetYear === year
+                        ? 'border-primary-600 bg-primary-50 text-primary-700'
                         : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                     >
@@ -181,7 +181,7 @@ export default function OnboardingUI() {
                   <button
                     key={level.id}
                     onClick={() => setData({ ...data, currentLevel: level.id })}
-                    className={`w-full p-6 rounded-3xl border-2 transition-all flex items-center gap-6 text-left ${data.currentLevel === level.id
+                    className={`w-full p-6 rounded-3xl border-2 transition-all flex items-center gap-6 text-left cursor-pointer ${data.currentLevel === level.id
                       ? 'border-primary-600 bg-primary-50 ring-4 ring-primary-50'
                       : 'border-slate-100 hover:border-slate-200'
                       }`}
@@ -205,19 +205,29 @@ export default function OnboardingUI() {
               <div className="pt-4 border-t border-slate-100">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Preferred Study Language</label>
                 <div className="flex gap-3">
-                  {['English', 'Hindi'].map((lang) => (
-                    <button
-                      key={lang}
-                      type="button"
-                      onClick={() => setData({ ...data, preferredLanguage: lang })}
-                      className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-colors ${data.preferredLanguage === lang
-                        ? 'border-primary-600 bg-primary-50 text-primary-700'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                    >
-                      {lang}
-                    </button>
-                  ))}
+                  {/* English Option (Active) */}
+                  <button
+                    type="button"
+                    onClick={() => setData({ ...data, preferredLanguage: 'English' })}
+                    className={`flex-1 py-3 rounded-xl border text-sm font-bold cursor-pointer transition-colors ${data.preferredLanguage === 'English'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    English
+                  </button>
+
+                  {/* Hindi Option (Disabled with Coming Soon Badge) */}
+                  <button
+                    type="button"
+                    disabled
+                    className="flex-1 py-3 rounded-xl border border-dashed border-slate-300 bg-slate-100/80 text-slate-400 text-sm font-bold cursor-not-allowed opacity-75 flex items-center justify-center gap-2 select-none"
+                  >
+                    <span>Hindi</span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 border border-slate-300">
+                      Coming Soon
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>
