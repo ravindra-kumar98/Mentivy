@@ -269,7 +269,7 @@ export default function RegisterPage() {
                       e.preventDefault();
                       setShowTooltip(prev => !prev);
                     }}
-                    className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                    className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors cursor-pointer"
                     aria-label="Password requirements info"
                   >
                     <Info className="w-3.5 h-3.5" />
@@ -306,7 +306,7 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(prev => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none cursor-pointer"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? (
@@ -321,14 +321,14 @@ export default function RegisterPage() {
             )}
           </div>
 
-          <Button type="submit" className="w-full mt-6" isLoading={isLoading}>
+          <Button type="submit" className="w-full mt-6 cursor-pointer" isLoading={isLoading}>
             Create Account
           </Button>
         </form>
 
         <div className="text-center mt-6 text-sm text-slate-500">
           Already have an account?{' '}
-          <Link href="/login" className="text-primary-600 hover:underline font-medium">
+          <Link href="/login" className="text-primary-600 hover:underline font-medium cursor-pointer">
             Log in here
           </Link>
         </div>

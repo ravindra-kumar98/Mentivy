@@ -42,6 +42,12 @@ router.post('/login', validateRequest(loginSchema), AuthController.login);
 // @route   POST /api/v1/auth/refresh
 router.post('/refresh', AuthController.refresh);
 
+// @route   POST /api/v1/auth/forgot-password
+router.post('/forgot-password', AuthController.forgotPassword);
+
+// @route   POST /api/v1/auth/reset-password
+router.post('/reset-password', AuthController.resetPassword);
+
 // @route   POST /api/v1/auth/logout
 router.post('/logout', AuthController.logout);
 

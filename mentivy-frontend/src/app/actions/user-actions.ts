@@ -117,5 +117,23 @@ export async function googleAuthAction(credential: string) {
   }
 }
 
+export async function forgotPasswordAction(email: string) {
+  try {
+    const result = await serverActionRequest('/auth/forgot-password', 'POST', { email });
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function resetPasswordAction(data: { email: string; otp: string; newPassword: string }) {
+  try {
+    const result = await serverActionRequest('/auth/reset-password', 'POST', data);
+    return { success: true, data: result.data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 
 
