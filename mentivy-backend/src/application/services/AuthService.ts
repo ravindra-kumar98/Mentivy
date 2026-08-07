@@ -75,7 +75,7 @@ export class AuthService {
             const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
             const tokens = this.generateTokens(verifiedUser._id.toString(), verifiedUser.role);
             return {
-                user: { id: verifiedUser._id, fullName: verifiedUser.fullName, email: verifiedUser.email, role: verifiedUser.role, needsOnboarding },
+                user: { id: verifiedUser._id, fullName: verifiedUser.fullName, email: verifiedUser.email, role: verifiedUser.role, avatarUrl: verifiedUser.avatarUrl, needsOnboarding },
                 ...tokens
             };
         }
@@ -129,6 +129,7 @@ export class AuthService {
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role,
+                avatarUrl: user.avatarUrl,
                 needsOnboarding
             },
             accessToken,
@@ -182,6 +183,7 @@ export class AuthService {
                     fullName: user.fullName,
                     email: user.email, 
                     role: user.role,
+                    avatarUrl: user.avatarUrl,
                     needsOnboarding 
                 }, 
                 accessToken, 
@@ -254,7 +256,9 @@ export class AuthService {
             // User exists - link Google ID & set verified
             user.googleId = googleId;
             user.isEmailVerified = true;
-            if (avatarUrl) user.avatarUrl = avatarUrl;
+            if (avatarUrl && !user.avatarUrl) {
+                user.avatarUrl = avatarUrl;
+            }
             await user.save();
         }
 
@@ -280,6 +284,7 @@ export class AuthService {
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role,
+                avatarUrl: user.avatarUrl,
                 needsOnboarding
             },
             accessToken,
@@ -307,6 +312,7 @@ export class AuthService {
                     fullName: user.fullName,
                     email: user.email, 
                     role: user.role,
+                    avatarUrl: user.avatarUrl,
                     needsOnboarding 
                 }, 
                 accessToken, 
