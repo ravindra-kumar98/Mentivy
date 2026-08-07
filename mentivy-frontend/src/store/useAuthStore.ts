@@ -7,13 +7,15 @@ export interface User {
   fullName?: string;
   email: string;
   role: string;
+  avatarUrl?: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean; // Useful for initial check
+  isLoading: boolean;
   setAuth: (user: User, accessToken: string) => void;
+  updateUser: (user: Partial<User>) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
 }
@@ -23,10 +25,15 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: true, // Start as loading until we check local storage
+      isLoading: true,
       setAuth: (user, accessToken) => {
         setAccessToken(accessToken);
         set({ user, isAuthenticated: true, isLoading: false });
+      },
+      updateUser: (updatedFields) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updatedFields } : null
+        }));
       },
       logout: async () => {
         try {
@@ -51,11 +58,11 @@ export const useAuthStore = create<AuthState>()(
       setLoading: (loading) => set({ isLoading: loading }),
     }),
     {
-      name: 'auth-storage', // name of the item in the storage (must be unique)
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }), // Only persist user and auth state
+      name: 'auth-storage',
+      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-           state.setLoading(false); // Done hydrating
+          state.setLoading(false);
         }
       }
     }

@@ -135,5 +135,39 @@ export async function resetPasswordAction(data: { email: string; otp: string; ne
   }
 }
 
+export async function changePasswordAction(data: { currentPassword: string; newPassword: string }) {
+  try {
+    const result = await serverActionRequest('/user/change-password', 'POST', data);
+    return { success: true, data: result };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAccountAction(data: { password?: string; confirmEmail?: string }) {
+  try {
+    const payload: { password?: string; confirmEmail?: string } = {};
+    if (data.password && data.password !== '$undefined' && data.password.trim()) {
+      payload.password = data.password.trim();
+    }
+    if (data.confirmEmail && data.confirmEmail !== '$undefined' && data.confirmEmail.trim()) {
+      payload.confirmEmail = data.confirmEmail.trim();
+    }
+
+    const result = await serverActionRequest('/user/account', 'DELETE', payload);
+
+    // Clear session cookies immediately
+    const cookieStore = await cookies();
+    cookieStore.delete('refreshToken');
+    cookieStore.delete('needsOnboarding');
+
+    return { success: true, data: result };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+
+
 
 

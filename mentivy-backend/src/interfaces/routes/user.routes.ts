@@ -8,5 +8,7 @@ router.use(requireAuth);
 
 router.get('/profile', ProfileController.getProfile);
 router.put('/profile', ProfileController.updateProfile);
+router.post('/change-password', ProfileController.changePassword);
+router.delete('/account', ProfileController.deleteAccount);
 
 export default router;

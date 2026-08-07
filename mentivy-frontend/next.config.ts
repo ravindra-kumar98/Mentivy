@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
     // walking up and picking up stray package.json files in parent directories
     root: process.cwd(),
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '5mb',
+    },
+  },
 };
 
 export default nextConfig;
