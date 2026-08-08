@@ -27,7 +27,7 @@ app.use(helmet());
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 app.use(express.json());
@@ -50,12 +50,15 @@ app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to Mentivy API' });
 });
 
+import notificationRoutes from './interfaces/routes/notification.routes';
+
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/guidance', guidanceRoutes);
 app.use('/api/v1/practice', practiceRoutes);
 app.use('/api/v1/questions', questionRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/public', publicRoutes);

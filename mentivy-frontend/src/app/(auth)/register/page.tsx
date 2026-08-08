@@ -332,6 +332,13 @@ export default function RegisterPage() {
             Log in here
           </Link>
         </div>
+
+        <div className="text-center text-xs text-slate-400 mt-4">
+          By signing up, you agree to our{' '}
+          <Link href="/privacy" className="underline hover:text-slate-600">
+            Privacy Policy
+          </Link>
+        </div>
       </div>
     </GoogleOAuthProvider>
   );

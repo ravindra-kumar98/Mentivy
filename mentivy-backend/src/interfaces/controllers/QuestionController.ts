@@ -7,9 +7,12 @@ import { z } from 'zod';
 
 export const getQuestionsSchema = z.object({
     query: z.object({
-        topicId: z.string().min(1, 'topicId is required'),
+        topicId: z.string().optional(),
+        subjectName: z.string().optional(),
         difficulty: z.string().optional().transform(v => v ? parseInt(v) : undefined),
         limit: z.string().optional().transform(v => v ? parseInt(v) : 10),
+        mode: z.enum(['PRACTICE', 'MOCK_TEST', 'WEAK_DRILL']).optional(),
+        examType: z.string().optional()
     })
 });
 
@@ -17,35 +20,58 @@ export const checkAnswerSchema = z.object({
     body: z.object({
         questionId: z.string().min(1, 'questionId is required'),
         selectedOptionIndex: z.number().int().min(0),
+        topicId: z.string().optional(),
+        timeTaken: z.number().optional()
     })
 });
 
 export class QuestionController {
     /**
-     * GET /api/v1/questions?topicId=...&difficulty=...&limit=...
-     * Returns sanitized questions (no correct answer) for client-side rendering
+     * GET /api/v1/questions?topicId=...&difficulty=...&limit=...&mode=...
+     * Returns sanitized questions for client-side rendering.
      */
     static async getQuestions(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
             const userId = req.user!.userId;
-            const { topicId, difficulty, limit } = req.query as {
-                topicId: string;
+            const { topicId, subjectName, difficulty, limit, mode, examType } = req.query as {
+                topicId?: string;
+                subjectName?: string;
                 difficulty?: string;
                 limit?: string;
+                mode?: 'PRACTICE' | 'MOCK_TEST' | 'WEAK_DRILL';
+                examType?: string;
             };
 
-            const questions = await QuestionService.getQuestionsForTopic(userId, {
+            const questions = await QuestionService.getQuestions(userId, {
                 topicId,
+                subjectName,
                 difficulty: difficulty ? parseInt(difficulty) : undefined,
                 limit: limit ? parseInt(limit) : 10,
+                mode,
+                examType
             });
-
-            const sanitized = questions.map(QuestionService.sanitizeForClient);
 
             res.status(200).json({
                 success: true,
-                data: sanitized,
-                count: sanitized.length,
+                data: questions,
+                count: questions.length,
+            });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+        }
+    }
+
+    /**
+     * GET /api/v1/questions/topics
+     * Returns all subjects and topics grouped with question counts and user stats.
+     */
+    static async getTopicsList(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const userId = req.user!.userId;
+            const topics = await QuestionService.getTopicsSummary(userId);
+            res.status(200).json({
+                success: true,
+                data: topics
             });
         } catch (error: any) {
             res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
@@ -55,7 +81,6 @@ export class QuestionController {
     /**
      * POST /api/v1/questions/check
      * Checks if the selected answer is correct and returns the explanation.
-     * This is called AFTER the user selects an option on the frontend.
      */
     static async checkAnswer(req: AuthenticatedRequest, res: Response): Promise<void> {
         try {
@@ -91,6 +116,27 @@ export class QuestionController {
             });
         } catch (error: any) {
             res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+        }
+    }
+
+    /**
+     * POST /api/v1/practice/submit-mock
+     * Submits an entire mock test session and computes full score with negative marking.
+     */
+    static async submitMockSession(req: AuthenticatedRequest, res: Response): Promise<void> {
+        try {
+            const userId = req.user!.userId;
+            const { answers } = req.body;
+
+            const result = await QuestionService.submitMockSession(userId, answers);
+
+            res.status(200).json({
+                success: true,
+                message: 'Mock test evaluated successfully',
+                data: result
+            });
+        } catch (error: any) {
+            res.status(400).json({ success: false, message: error.message || 'Failed to submit mock test' });
         }
     }
 }
