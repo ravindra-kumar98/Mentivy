@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   User, 
   Target, 
@@ -17,7 +18,11 @@ import {
   Phone,
   Mail,
   Languages,
-  Camera
+  Camera,
+  ShieldCheck,
+  Download,
+  ExternalLink,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -44,7 +49,7 @@ export interface ProfileData {
 
 export default function SettingsUI({ initialData }: { initialData: ProfileData }) {
   const { user: authUser, updateUser } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'profile' | 'learning' | 'security' | 'notifications'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'learning' | 'security' | 'notifications' | 'privacy'>('profile');
   const [data, setData] = useState<ProfileData>({
     ...initialData,
     fullName: initialData?.fullName || authUser?.fullName || '',
@@ -89,7 +94,7 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.slice(0, 50); // Enforce 50 chars limit
+    const value = e.target.value.slice(0, 50);
     setData(prev => ({ ...prev, fullName: value }));
     if (fieldErrors.fullName) {
       setFieldErrors(prev => ({ ...prev, fullName: undefined }));
@@ -97,7 +102,7 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const numericOnly = e.target.value.replace(/\D/g, '').slice(0, 10); // Enforce 10 digits limit
+    const numericOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
     setData(prev => ({ ...prev, phoneNumber: numericOnly }));
     if (fieldErrors.phoneNumber) {
       setFieldErrors(prev => ({ ...prev, phoneNumber: undefined }));
@@ -132,6 +137,29 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
     setIsSaving(false);
   };
 
+  // Self-serve study data exporter
+  const handleExportData = () => {
+    const exportPayload = {
+      user: {
+        email: data.email,
+        fullName: data.fullName,
+        targetExam: data.targetExam,
+        dailyTimeAvailability: data.dailyTimeAvailability,
+        currentLevel: data.currentLevel
+      },
+      exportedAt: new Date().toISOString(),
+      platform: 'Mentivy AI Spaced Repetition'
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mentivy_study_data_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const userInitial = (data.fullName || data.email || 'S').charAt(0).toUpperCase();
 
   const tabs = [
@@ -139,6 +167,7 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
     { id: 'learning', name: 'Learning Goals', icon: Target },
     { id: 'security', name: 'Security', icon: Shield },
     { id: 'notifications', name: 'Notifications', icon: Bell },
+    { id: 'privacy', name: 'Privacy & Data', icon: ShieldCheck },
   ] as const;
 
   return (
@@ -173,7 +202,7 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
 
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Account Settings</h2>
-        <p className="mt-2 text-slate-500">Manage your personal profile, learning goals, and account security.</p>
+        <p className="mt-2 text-slate-500">Manage your personal profile, learning goals, privacy, and account security.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -531,8 +560,70 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
               </div>
             )}
 
+            {/* TAB 5: PRIVACY & DATA */}
+            {activeTab === 'privacy' && (
+              <div className="space-y-6">
+                
+                {/* Guarantee Overview */}
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                  <div className="flex items-center gap-3 text-slate-900">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                    <h4 className="font-bold text-base">Privacy &amp; Data Protection Overview</h4>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Your personal information and learning telemetry are protected under strict security standards. Passwords are encrypted with bcrypt hashing, sessions are secured with httpOnly JWT tokens, and your quiz scores are never shared with third-party advertisers.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                      <span className="text-xs font-bold text-slate-900 block">🔒 End-to-End Auth</span>
+                      <p className="text-[11px] text-slate-400">HttpOnly cookies protect your active login against cross-site scripting.</p>
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl border border-slate-200/80 space-y-1">
+                      <span className="text-xs font-bold text-slate-900 block">🧠 Spaced Repetition Telemetry</span>
+                      <p className="text-[11px] text-slate-400">Test accuracy strictly feeds the Leitner 5-stage revision algorithm.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Self-Serve Data Export */}
+                <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-sm">Download My Study Data</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Export a copy of your study schedule, accuracy stats, and profile as JSON.</p>
+                    </div>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleExportData}
+                      className="rounded-xl gap-1.5 text-xs font-bold cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Export JSON</span>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Public Policy Link */}
+                <div className="p-4 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <FileText className="w-4 h-4 text-primary-700" />
+                    <span className="text-xs font-bold text-primary-900">Read Official Privacy Policy Document</span>
+                  </div>
+                  <Link href="/privacy" target="_blank" className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 hover:text-primary-800">
+                    <span>View Document</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+
+              </div>
+            )}
+
             {/* Save Changes Footer */}
-            {activeTab !== 'security' && activeTab !== 'notifications' && (
+            {activeTab !== 'security' && activeTab !== 'notifications' && activeTab !== 'privacy' && (
               <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
                 <Button 
                   onClick={handleSave} 

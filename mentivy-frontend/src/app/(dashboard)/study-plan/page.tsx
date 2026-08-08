@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 export default async function StudyPlanPage() {
   try {
     const res = await serverFetch('/guidance/daily-plan');
-    const plan = res.data;
+    const planData = res.data;
 
-    return <StudyPlanUI plan={plan} />;
+    return <StudyPlanUI planData={planData} />;
   } catch (err: any) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">

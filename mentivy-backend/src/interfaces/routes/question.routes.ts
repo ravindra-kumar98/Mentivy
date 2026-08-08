@@ -7,10 +7,13 @@ const router = Router();
 
 router.use(requireAuth);
 
+// GET /api/v1/questions/topics — get all subjects and topics with question counts
+router.get('/topics', QuestionController.getTopicsList);
+
 // GET /api/v1/questions?topicId=...
 router.get('/', QuestionController.getQuestions);
 
-// POST /api/v1/questions/check  — verify a selected answer
+// POST /api/v1/questions/check — verify a selected answer
 router.post('/check', validateRequest(checkAnswerSchema), QuestionController.checkAnswer);
 
 export default router;

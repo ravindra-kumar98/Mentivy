@@ -193,6 +193,13 @@ export default function LoginPage() {
             Create one now
           </Link>
         </div>
+
+        <div className="text-center text-xs text-slate-400 mt-4">
+          Protected by Mentivy Security •{' '}
+          <Link href="/privacy" className="underline hover:text-slate-600">
+            Privacy Policy
+          </Link>
+        </div>
       </div>
     </GoogleOAuthProvider>
   );
