@@ -32,6 +32,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { ChangePasswordModal } from '@/components/features/settings/ChangePasswordModal';
 import { AvatarEditModal } from '@/components/features/settings/AvatarEditModal';
 import { DeleteAccountModal } from '@/components/features/settings/DeleteAccountModal';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 export interface ProfileData {
   id?: string;
@@ -247,13 +248,12 @@ export default function SettingsUI({ initialData }: { initialData: ProfileData }
                 {/* Avatar with Edit Badge */}
                 <div className="flex items-center gap-5 pb-6 border-b border-slate-100">
                   <div className="relative group">
-                    <div className="w-20 h-20 rounded-full bg-primary-50 flex items-center justify-center border-2 border-primary-100 shadow-sm text-primary-600 font-black text-2xl overflow-hidden">
-                      {data.avatarUrl ? (
-                        <img src={data.avatarUrl} alt={data.fullName || 'User'} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{userInitial}</span>
-                      )}
-                    </div>
+                    <UserAvatar
+                      src={data.avatarUrl}
+                      name={data.fullName || data.email}
+                      sizeClassName="w-20 h-20 text-2xl font-black"
+                      className="border-2 border-primary-100 shadow-sm"
+                    />
                     
                     {/* Camera Edit Badge */}
                     <button

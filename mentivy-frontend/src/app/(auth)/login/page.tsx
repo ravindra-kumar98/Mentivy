@@ -106,9 +106,9 @@ export default function LoginPage() {
             {error}
           </div>
         )}
-        
+
         {/* Google 1-Click Login */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="w-full flex justify-center [&>div]:w-full [&_iframe]:!w-full">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => setError('Google sign-in was cancelled or failed')}
@@ -116,8 +116,9 @@ export default function LoginPage() {
             shape="rectangular"
             theme="outline"
             size="large"
-            width="100%"
+            width="384"
             text="signin_with"
+            logo_alignment="center"
           />
         </div>
 
@@ -134,16 +135,16 @@ export default function LoginPage() {
             <Label htmlFor="email">
               Email <span className="text-red-500">*</span>
             </Label>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="student@mentivy.com" 
+            <Input
+              id="email"
+              type="email"
+              placeholder="student@mentivy.com"
               value={formData.email}
               onChange={handleChange}
-              required 
+              required
             />
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex justify-between">
               <Label htmlFor="password">
@@ -158,13 +159,13 @@ export default function LoginPage() {
               </button>
             </div>
             <div className="relative">
-              <Input 
-                id="password" 
-                type={showPassword ? 'text' : 'password'} 
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                required 
+                required
                 className="pr-10"
               />
               <button
@@ -181,7 +182,7 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
-          
+
           <Button type="submit" className="w-full mt-6 cursor-pointer" isLoading={isLoading}>
             Sign In
           </Button>

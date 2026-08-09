@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, PanelLeftClose, PanelLeft, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import NotificationDropdown from './NotificationDropdown';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -71,13 +72,12 @@ export default function Header({ onMenuClick, isCollapsed = false, onToggleColla
           href="/settings"
           className="flex items-center gap-2.5 hover:bg-slate-50 p-1.5 rounded-2xl border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
         >
-          <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center border border-primary-200 text-primary-700 font-bold text-sm overflow-hidden group-hover:ring-2 group-hover:ring-primary-200 transition-all">
-            {user?.avatarUrl ? (
-              <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
-            ) : (
-              <span>{displayName.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
+          <UserAvatar 
+            src={user?.avatarUrl} 
+            name={displayName} 
+            sizeClassName="w-9 h-9 text-sm"
+            className="group-hover:ring-2 group-hover:ring-primary-200 transition-all"
+          />
           <div className="hidden sm:block text-left pr-1">
             <p className="text-xs font-bold text-slate-900 leading-tight capitalize truncate max-w-[130px]">
               {displayName}
