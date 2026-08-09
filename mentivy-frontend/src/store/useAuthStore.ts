@@ -12,6 +12,7 @@ export interface User {
 
 interface AuthState {
   user: User | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   setAuth: (user: User, accessToken: string) => void;
@@ -24,11 +25,12 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      accessToken: null,
       isAuthenticated: false,
       isLoading: true,
       setAuth: (user, accessToken) => {
         setAccessToken(accessToken);
-        set({ user, isAuthenticated: true, isLoading: false });
+        set({ user, accessToken, isAuthenticated: true, isLoading: false });
       },
       updateUser: (updatedFields) => {
         set((state) => ({
@@ -42,7 +44,7 @@ export const useAuthStore = create<AuthState>()(
           // Ignore error, we still want to logout locally
         }
         setAccessToken(''); // Clear token in axios
-        set({ user: null, isAuthenticated: false, isLoading: false });
+        set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
 
         if (typeof window !== 'undefined') {
           // Explicitly clear cookies on client side
@@ -59,9 +61,16 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ 
+        user: state.user, 
+        isAuthenticated: state.isAuthenticated,
+        accessToken: state.accessToken 
+      }),
       onRehydrateStorage: () => (state) => {
         if (state) {
+          if (state.accessToken) {
+            setAccessToken(state.accessToken);
+          }
           state.setLoading(false);
         }
       }
