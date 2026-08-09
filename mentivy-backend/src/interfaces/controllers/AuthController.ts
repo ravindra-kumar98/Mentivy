@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../../application/services/AuthService';
 
+const isProduction = process.env.NODE_ENV === 'production';
+const cookieSameSite = (isProduction ? 'none' : 'lax') as 'none' | 'lax';
+
 export class AuthController {
     static async register(req: Request, res: Response): Promise<void> {
         try {
@@ -29,19 +32,19 @@ export class AuthController {
 
             const { user, accessToken, refreshToken } = await AuthService.verifyEmail(email, otp);
 
-            // Set HttpOnly Cookie for Refresh Token
+            // Set Cross-Origin compatible HttpOnly Cookie for Refresh Token
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -92,16 +95,16 @@ export class AuthController {
             
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -132,16 +135,16 @@ export class AuthController {
 
             res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -168,16 +171,16 @@ export class AuthController {
 
             res.cookie('refreshToken', newRefreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
             res.cookie('needsOnboarding', (user as any).needsOnboarding.toString(), {
                 httpOnly: false,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+                secure: isProduction,
+                sameSite: cookieSameSite,
                 path: '/',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
@@ -194,8 +197,8 @@ export class AuthController {
     static async logout(req: Request, res: Response): Promise<void> {
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: (process.env.NODE_ENV === 'production' ? 'strict' : 'lax') as any,
+            secure: isProduction,
+            sameSite: cookieSameSite as any,
             path: '/',
         };
         res.clearCookie('refreshToken', cookieOptions);
