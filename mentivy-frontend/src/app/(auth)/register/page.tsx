@@ -140,12 +140,20 @@ export default function RegisterPage() {
     setIsLoading(false);
   };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    if (!credentialResponse.credential) return;
+  const handleGoogleSuccess = async (credentialOrResponse: any) => {
+    const token = typeof credentialOrResponse === 'string' 
+      ? credentialOrResponse 
+      : (credentialOrResponse?.credential || credentialOrResponse?.access_token);
+    
+    if (!token) {
+      setServerError('Could not retrieve Google authentication token');
+      return;
+    }
+
     setIsLoading(true);
     setServerError('');
 
-    const result = await googleAuthAction(credentialResponse.credential);
+    const result = await googleAuthAction(token);
     if (result.success && result.data?.user) {
       setAuth(result.data.user, result.data.accessToken);
       window.location.href = '/onboarding';
@@ -205,6 +213,7 @@ export default function RegisterPage() {
               placeholder="Ravindra Kumar"
               value={formData.fullName}
               onChange={handleChange}
+              autoComplete="name"
             />
             {fieldErrors.fullName && (
               <p className="text-xs text-red-500 font-medium mt-1">{fieldErrors.fullName}</p>
@@ -222,6 +231,7 @@ export default function RegisterPage() {
               placeholder="student@mentivy.com"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
             />
             {fieldErrors.email && (
               <p className="text-xs text-red-500 font-medium mt-1">{fieldErrors.email}</p>
@@ -296,6 +306,7 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="new-password"
                 className="pr-10"
               />
               <button
