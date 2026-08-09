@@ -4,13 +4,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Info } from 'lucide-react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { useAuthStore } from '@/store/useAuthStore';
 import { registerUser, googleAuthAction } from '@/app/actions/user-actions';
 import EmailVerificationModal from '@/components/features/auth/EmailVerificationModal';
+import GoogleAuthButton from '@/components/features/auth/GoogleAuthButton';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -177,19 +178,12 @@ export default function RegisterPage() {
         )}
 
         {/* Google 1-Click Sign Up */}
-        <div className="w-full flex justify-center items-center [&>div]:w-full [&_iframe]:!w-full">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setServerError('Google sign-up was cancelled or failed')}
-            useOneTap={false}
-            shape="rectangular"
-            theme="outline"
-            size="large"
-            width="384"
-            text="signup_with"
-            logo_alignment="center"
-          />
-        </div>
+        <GoogleAuthButton
+          mode="signup"
+          onSuccess={handleGoogleSuccess}
+          onError={(err) => setServerError(err)}
+          isLoading={isLoading}
+        />
 
         {/* Divider */}
         <div className="relative flex items-center justify-center my-4">

@@ -214,7 +214,7 @@ export class AuthService {
     }
 
     static async googleAuth(credential: string) {
-        let payload;
+        let payload: any;
         try {
             const ticket = await googleClient.verifyIdToken({
                 idToken: credential,
@@ -222,12 +222,26 @@ export class AuthService {
             });
             payload = ticket.getPayload();
         } catch (err) {
-            // Fallback for decoding base64 JWT payload if client ID is local/test
+            // Check if it's a Google OAuth access token
             try {
-                const parts = credential.split('.');
-                payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+                const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${credential}` }
+                });
+                if (response.ok) {
+                    payload = await response.json();
+                }
             } catch (e) {
-                throw new Error('Invalid Google credential');
+                // Ignore and try JWT decode
+            }
+
+            // Fallback for decoding base64 JWT payload if client ID is local/test
+            if (!payload) {
+                try {
+                    const parts = credential.split('.');
+                    payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+                } catch (e) {
+                    throw new Error('Invalid Google credential');
+                }
             }
         }
 
