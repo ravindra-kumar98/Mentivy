@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { updateProfile } from '@/app/actions/user-actions';
 import { useAuthStore } from '@/store/useAuthStore';
+import { APPLE_ANIMAL_AVATARS } from './animalAvatars';
 
 interface AvatarEditModalProps {
   isOpen: boolean;
@@ -27,20 +28,20 @@ interface AvatarEditModalProps {
   onAvatarUpdated: (newAvatarUrl: string) => void;
 }
 
-// 12 Curated Diverse Human Student Avatars (100% Human Characters)
+// 12 Curated Professional & Academic Student Avatars (Aesthetic, Modern & Clean)
 const PRESET_HUMAN_AVATARS = [
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Aiden&backgroundColor=b6e3f4&hair=shortHairShortFlat&facialHairProbability=0',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma&backgroundColor=ffd5dc&hair=longHairBigHair&facialHairProbability=0',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Liam&backgroundColor=d1d4f9&hair=shortHairCurly&facialHairProbability=0',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Sophia&backgroundColor=ffdfbf&hair=longHairStraight&facialHairProbability=0',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas&backgroundColor=c0aede&hair=shortHairShortWaved&accessories=eyepatch',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia&backgroundColor=b6e3f4&hair=longHairBob&glasses=prescription02',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Noah&backgroundColor=ffd5dc&hair=shortHairShortCurly&glasses=round',
-  'https://api.dicebear.com/7.x/avataaars/svg?seed=Ava&backgroundColor=d1d4f9&hair=longHairCurly&glasses=prescription01',
-  'https://api.dicebear.com/7.x/adventurer/svg?seed=Leo&backgroundColor=b6e3f4',
-  'https://api.dicebear.com/7.x/adventurer/svg?seed=Mia&backgroundColor=ffd5dc',
-  'https://api.dicebear.com/7.x/adventurer/svg?seed=Sam&backgroundColor=c0aede',
-  'https://api.dicebear.com/7.x/adventurer/svg?seed=Alex&backgroundColor=ffdfbf',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Alexander&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Sophia&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Marcus&backgroundColor=d1d4f9',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Elena&backgroundColor=ffdfbf',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=David&backgroundColor=c0aede',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Chloe&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Lucas&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/lorelei/svg?seed=Aria&backgroundColor=d1d4f9',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Maya&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Oliver&backgroundColor=d1d4f9',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe&backgroundColor=ffdfbf',
 ];
 
 export function AvatarEditModal({
@@ -53,6 +54,7 @@ export function AvatarEditModal({
   const { user: authUser, updateUser } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>(currentAvatarUrl);
+  const [avatarCategory, setAvatarCategory] = useState<'students' | 'animals'>('students');
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +77,7 @@ export function AvatarEditModal({
   useEffect(() => {
     if (isOpen) {
       setSelectedAvatar(currentAvatarUrl || '');
+      setAvatarCategory('students');
       setRawImageSrc(null);
       setZoom(1);
       setRotation(0);
@@ -460,16 +463,45 @@ export function AvatarEditModal({
                 )}
               </div>
 
-              {/* 12 Curated Human Student Avatars */}
+              {/* Preset Avatars Selector with Category Switcher */}
               <div>
-                <div className="flex items-center gap-1.5 mb-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <Sparkles className="w-3.5 h-3.5 text-primary-600" />
-                  <span>Or Pick a Student Avatar</span>
-                </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 max-h-48 overflow-y-auto p-1">
-                  {PRESET_HUMAN_AVATARS.map((url, idx) => (
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <Sparkles className="w-3.5 h-3.5 text-primary-600" />
+                    <span>Choose an Avatar</span>
+                  </div>
+
+                  {/* Category Toggle Tabs */}
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-xl text-xs font-semibold">
                     <button
-                      key={idx}
+                      type="button"
+                      onClick={() => setAvatarCategory('students')}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        avatarCategory === 'students'
+                          ? 'bg-white text-primary-700 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      🎓 Scholars (12)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAvatarCategory('animals')}
+                      className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        avatarCategory === 'animals'
+                          ? 'bg-white text-primary-700 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      🐾 Mascots (12)
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 max-h-48 overflow-y-auto p-1">
+                  {(avatarCategory === 'students' ? PRESET_HUMAN_AVATARS : APPLE_ANIMAL_AVATARS).map((url, idx) => (
+                    <button
+                      key={`${avatarCategory}-${idx}`}
                       type="button"
                       onClick={() => {
                         setSelectedAvatar(url);
@@ -481,9 +513,15 @@ export function AvatarEditModal({
                           : 'border-slate-100 hover:border-slate-300'
                       }`}
                     >
-                      <img src={url} alt={`Student Avatar ${idx + 1}`} className="w-12 h-12 rounded-xl mx-auto object-cover" />
+                      <img 
+                        src={url} 
+                        alt={`Avatar ${idx + 1}`} 
+                        referrerPolicy="no-referrer"
+                        crossOrigin="anonymous"
+                        className="w-12 h-12 rounded-xl mx-auto object-cover" 
+                      />
                       {selectedAvatar === url && (
-                        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary-600 text-white flex items-center justify-center">
+                        <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-xs">
                           <Check className="w-3 h-3 stroke-[3]" />
                         </div>
                       )}
