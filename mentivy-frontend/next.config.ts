@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

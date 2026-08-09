@@ -60,12 +60,20 @@ export default function LoginPage() {
     setIsLoading(false);
   };
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    if (!credentialResponse.credential) return;
+  const handleGoogleSuccess = async (credentialOrResponse: any) => {
+    const token = typeof credentialOrResponse === 'string' 
+      ? credentialOrResponse 
+      : (credentialOrResponse?.credential || credentialOrResponse?.access_token);
+    
+    if (!token) {
+      setError('Could not retrieve Google authentication token');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
-    const result = await googleAuthAction(credentialResponse.credential);
+    const result = await googleAuthAction(token);
     if (result.success && result.data?.user) {
       setAuth(result.data.user, result.data.accessToken);
       if (result.data.user.role === 'ADMIN') {
@@ -135,6 +143,7 @@ export default function LoginPage() {
               placeholder="student@mentivy.com"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="username"
               required
             />
           </div>
@@ -159,6 +168,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
+                autoComplete="current-password"
                 required
                 className="pr-10"
               />
