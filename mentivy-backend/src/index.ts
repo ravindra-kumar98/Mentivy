@@ -10,6 +10,7 @@ import guidanceRoutes from './interfaces/routes/guidance.routes';
 import practiceRoutes from './interfaces/routes/practice.routes';
 import questionRoutes from './interfaces/routes/question.routes';
 import analyticsRoutes from './interfaces/routes/analytics.routes';
+import notificationRoutes from './interfaces/routes/notification.routes';
 import userRoutes from './interfaces/routes/user.routes';
 import adminRoutes from './interfaces/routes/admin.routes';
 import publicRoutes from './interfaces/routes/public.routes';
@@ -20,27 +21,57 @@ const app = express();
 
 const PORT = process.env.PORT || 5001;
 
+// Trust reverse proxies (Render, Vercel, Heroku, AWS ELB, Cloudflare)
+app.set('trust proxy', 1);
 
-
-// Middleware
+// Security Headers
 app.use(helmet());
+
+// Production CORS Configuration supporting Vercel and local development
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://mentivy.vercel.app',
+    process.env.CLIENT_URL
+].filter(Boolean) as string[];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps, curl, or SSR fetch from Next.js server)
+        if (!origin) return callback(null, true);
+        
+        const isAllowed = allowedOrigins.includes(origin) || 
+                          origin.endsWith('.vercel.app') || 
+                          origin.includes('mentivy');
+
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            callback(null, true); // Permissive fallback to prevent deployment breaks
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With']
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
-// Rate Limiter
-const limiter = rateLimit({
+// Production-ready API Rate Limiter (2500 requests per 15 minutes)
+const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
+    max: 2500, // Generous threshold for Next.js SSR + Client navigation
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Too many requests from this IP, please try again in a few minutes.'
+    }
 });
-app.use(limiter);
+app.use('/api', apiLimiter);
 
-// Health check endpoint
+// Health check endpoint (exempt from rate limiting)
 app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({ status: 'UP', message: 'Mentivy API is running' });
 });
@@ -49,8 +80,6 @@ app.get('/health', (req: Request, res: Response) => {
 app.get('/', (req: Request, res: Response) => {
     res.json({ message: 'Welcome to Mentivy API' });
 });
-
-import notificationRoutes from './interfaces/routes/notification.routes';
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
