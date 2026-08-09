@@ -408,7 +408,13 @@ export function AvatarEditModal({
             <div className="flex flex-col items-center justify-center">
               <div className="relative w-24 h-24 rounded-full border-4 border-primary-100 shadow-md overflow-hidden bg-primary-50 flex items-center justify-center">
                 {selectedAvatar ? (
-                  <img src={selectedAvatar} alt="Avatar preview" className="w-full h-full object-cover" />
+                  <img 
+                    src={selectedAvatar} 
+                    alt="" 
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   <span className="text-4xl font-black text-primary-600 uppercase select-none">
                     {userInitial}

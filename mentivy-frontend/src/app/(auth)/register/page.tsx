@@ -177,7 +177,7 @@ export default function RegisterPage() {
         )}
 
         {/* Google 1-Click Sign Up */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="w-full flex justify-center items-center [&>div]:w-full [&_iframe]:!w-full">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => setServerError('Google sign-up was cancelled or failed')}
@@ -185,8 +185,9 @@ export default function RegisterPage() {
             shape="rectangular"
             theme="outline"
             size="large"
-            width="100%"
+            width="384"
             text="signup_with"
+            logo_alignment="center"
           />
         </div>
 
