@@ -11,7 +11,9 @@ import {
   BarChart3, 
   Settings, 
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Crown,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
@@ -32,7 +34,9 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsCollapsed }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const isTeacher = user?.role === 'ADMIN';
 
   return (
     <>
@@ -58,9 +62,9 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsC
           "h-16 shrink-0 flex items-center border-b border-slate-100 transition-all",
           isCollapsed ? "justify-center px-2" : "px-6"
         )}>
-          <Link href="/dashboard" className="flex items-center gap-2.5 group" title="Mentivy Dashboard">
-            <div className="w-9 h-9 bg-primary-600 group-hover:bg-primary-700 rounded-xl flex items-center justify-center shadow-xs transition-colors shrink-0">
-              <span className="text-white font-black text-xl leading-none">M</span>
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-primary-600 rounded-xl flex items-center justify-center shadow-xs">
+              <span className="text-white font-black text-lg leading-none">M</span>
             </div>
             {!isCollapsed && (
               <span className="font-extrabold text-xl text-slate-900 tracking-tight">Mentivy</span>
@@ -73,6 +77,28 @@ export default function Sidebar({ isOpen, setIsOpen, isCollapsed = false, setIsC
           "flex-1 px-3 py-4 space-y-1.5 min-h-0",
           isCollapsed ? "overflow-visible" : "overflow-y-auto"
         )}>
+          {/* Admin / Super Admin Portal Switcher */}
+          {(isSuperAdmin || isTeacher) && (
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center rounded-xl text-xs font-bold transition-all mb-3 group relative border",
+                isSuperAdmin 
+                  ? "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" 
+                  : "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100",
+                isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-2.5"
+              )}
+            >
+              {isSuperAdmin ? <Crown className="w-4 h-4 text-purple-600 shrink-0" /> : <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />}
+              {!isCollapsed && <span>{isSuperAdmin ? '👑 Super Admin Portal' : '👨‍🏫 Teacher Portal'}</span>}
+              {isCollapsed && (
+                <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 whitespace-nowrap pointer-events-none flex items-center border border-slate-800">
+                  <span>{isSuperAdmin ? 'Super Admin Portal' : 'Teacher Portal'}</span>
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
+                </div>
+              )}
+            </Link>
+          )}
           {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (

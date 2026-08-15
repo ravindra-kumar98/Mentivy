@@ -7,13 +7,16 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Database,
+  Users,
+  GraduationCap,
   LogOut
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 
 const navigation = [
-  { name: 'Overview',   href: '/admin',         icon: LayoutDashboard },
-  { name: 'Content CMS', href: '/admin/content', icon: Database },
+  { name: 'Overview',        href: '/admin',         icon: LayoutDashboard },
+  { name: 'Content CMS',     href: '/admin/content', icon: Database },
+  { name: 'User Management', href: '/admin/users',   icon: Users },
 ];
 
 interface AdminSidebarProps {
@@ -84,8 +87,17 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-800 shrink-0">
-          <div className="px-4 py-3 mb-2 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
+        <div className="p-4 border-t border-slate-800 shrink-0 space-y-2">
+          {/* Switch to Student Portal */}
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold text-sky-300 bg-sky-950/60 border border-sky-800/60 hover:bg-sky-900/60 hover:text-white transition-all cursor-pointer"
+          >
+            <GraduationCap className="w-4 h-4 text-sky-400 shrink-0" />
+            <span>🎓 Student Experience</span>
+          </Link>
+
+          <div className="px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-xs">
                 {useAuthStore.getState().user?.email?.slice(0, 2).toUpperCase() ?? 'AD'}
@@ -93,7 +105,11 @@ export default function AdminSidebar({ isOpen, setIsOpen }: AdminSidebarProps) {
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-bold text-white truncate">{useAuthStore.getState().user?.email ?? 'Administrator'}</span>
-              <span className="text-xs text-emerald-400 font-medium">System Online</span>
+              <span className={`text-[11px] font-bold ${
+                useAuthStore.getState().user?.role === 'SUPER_ADMIN' ? 'text-purple-400' : 'text-sky-400'
+              }`}>
+                {useAuthStore.getState().user?.role === 'SUPER_ADMIN' ? '👑 Super Admin (Owner)' : '👨‍🏫 Teacher / Admin'}
+              </span>
             </div>
           </div>
           

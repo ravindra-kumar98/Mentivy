@@ -131,32 +131,32 @@ export default function EmailVerificationModal({
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-all duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 text-center overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full cursor-pointer transition-colors"
+          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full cursor-pointer transition-colors"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Icon & Heading */}
-        <div className="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 dark:border-indigo-900/50">
-          <Mail className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+        <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100">
+          <Mail className="w-7 h-7 text-indigo-600" />
         </div>
 
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Verify Your Email</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+        <h3 className="text-2xl font-bold text-slate-900">Verify Your Email</h3>
+        <p className="text-sm text-slate-500 mt-2 leading-relaxed">
           We've sent a 6-digit verification code to <br />
-          <span className="font-semibold text-slate-800 dark:text-slate-200 break-all">{email}</span>
+          <span className="font-semibold text-slate-800 break-all">{email}</span>
         </p>
 
         {/* Error Alert */}
         {error && (
-          <div className="mt-4 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium border border-red-200 dark:border-red-900/50">
+          <div className="mt-4 p-3.5 rounded-xl bg-red-50 text-red-600 text-xs font-medium border border-red-200">
             {error}
           </div>
         )}
@@ -175,10 +175,10 @@ export default function EmailVerificationModal({
                 onChange={(e) => handleInputChange(idx, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(idx, e)}
                 onPaste={handlePaste}
-                className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/60 border-2 rounded-xl focus:bg-white dark:focus:bg-slate-800 focus:outline-none transition-all ${
+                className={`w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold text-slate-900 bg-slate-50 border-2 rounded-xl focus:bg-white focus:outline-none transition-all ${
                   digit 
-                    ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/50' 
-                    : 'border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
+                    ? 'border-indigo-600 bg-indigo-50/60 text-indigo-900' 
+                    : 'border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10'
                 }`}
               />
             ))}
@@ -188,7 +188,7 @@ export default function EmailVerificationModal({
             type="submit"
             isLoading={isVerifying}
             disabled={otp.join('').length < 6}
-            className="w-full h-12 text-base font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white cursor-pointer shadow-lg shadow-indigo-500/25 transition duration-200 disabled:opacity-50"
+            className="w-full h-12 text-base font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white cursor-pointer shadow-md shadow-indigo-500/20 transition duration-200 disabled:opacity-50"
           >
             <ShieldCheck className="w-5 h-5 mr-2 inline" />
             Verify Email Code
@@ -196,11 +196,11 @@ export default function EmailVerificationModal({
         </form>
 
         {/* Resend & Change Email Footer */}
-        <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
           <button
             type="button"
             onClick={onClose}
-            className="font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer transition-colors"
+            className="font-medium text-slate-600 hover:text-slate-900 cursor-pointer transition-colors"
           >
             Change Email
           </button>
@@ -210,7 +210,7 @@ export default function EmailVerificationModal({
             onClick={handleResend}
             disabled={timer > 0 || isResending}
             className={`font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer ${
-              timer > 0 ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed' : 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700'
+              timer > 0 ? 'text-slate-400 cursor-not-allowed' : 'text-indigo-600 hover:text-indigo-700'
             }`}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isResending ? 'animate-spin' : ''}`} />

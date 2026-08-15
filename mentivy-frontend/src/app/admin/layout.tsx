@@ -19,7 +19,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated || user?.role !== 'ADMIN') {
+      if (!isAuthenticated || (user?.role !== 'ADMIN' && user?.role !== 'SUPER_ADMIN')) {
         router.replace('/dashboard');
       } else {
         setIsAuthorized(true);
