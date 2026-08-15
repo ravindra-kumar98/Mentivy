@@ -3,7 +3,8 @@ export interface User {
     fullName?: string;
     email: string;
     passwordHash?: string;
-    role: 'STUDENT' | 'ADMIN';
+    role: 'STUDENT' | 'ADMIN' | 'SUPER_ADMIN';
+    assignedFields?: string[];
     phoneNumber?: string;
     avatarUrl?: string;
     googleId?: string;

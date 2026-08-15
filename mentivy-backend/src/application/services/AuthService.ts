@@ -75,7 +75,15 @@ export class AuthService {
             const needsOnboarding = !profile || profile.targetExam === 'UNKNOWN' || profile.targetExam === 'Not set';
             const tokens = this.generateTokens(verifiedUser._id.toString(), verifiedUser.role);
             return {
-                user: { id: verifiedUser._id, fullName: verifiedUser.fullName, email: verifiedUser.email, role: verifiedUser.role, avatarUrl: verifiedUser.avatarUrl, needsOnboarding },
+                user: { 
+                    id: verifiedUser._id, 
+                    fullName: verifiedUser.fullName, 
+                    email: verifiedUser.email, 
+                    role: verifiedUser.role, 
+                    assignedFields: verifiedUser.assignedFields || [],
+                    avatarUrl: verifiedUser.avatarUrl, 
+                    needsOnboarding 
+                },
                 ...tokens
             };
         }
@@ -129,6 +137,7 @@ export class AuthService {
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role,
+                assignedFields: user.assignedFields || [],
                 avatarUrl: user.avatarUrl,
                 needsOnboarding
             },
@@ -183,7 +192,8 @@ export class AuthService {
                     fullName: user.fullName,
                     email: user.email, 
                     role: user.role,
-                    avatarUrl: user.avatarUrl,
+                    assignedFields: user.assignedFields || [],
+                    avatarUrl: user.avatarUrl, 
                     needsOnboarding 
                 }, 
                 accessToken, 
@@ -298,6 +308,7 @@ export class AuthService {
                 fullName: user.fullName,
                 email: user.email,
                 role: user.role,
+                assignedFields: user.assignedFields || [],
                 avatarUrl: user.avatarUrl,
                 needsOnboarding
             },
@@ -326,7 +337,8 @@ export class AuthService {
                     fullName: user.fullName,
                     email: user.email, 
                     role: user.role,
-                    avatarUrl: user.avatarUrl,
+                    assignedFields: user.assignedFields || [],
+                    avatarUrl: user.avatarUrl, 
                     needsOnboarding 
                 }, 
                 accessToken, 
