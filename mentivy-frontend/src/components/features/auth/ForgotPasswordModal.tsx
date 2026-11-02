@@ -177,12 +177,12 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md transition-all duration-300">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-all duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           onClick={handleCloseModal}
-          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -191,17 +191,17 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {step === 1 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50 mx-auto">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 mb-2 border border-indigo-100 mx-auto">
                 <KeyRound className="w-7 h-7" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Forgot Password?</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <h2 className="text-2xl font-bold text-slate-900">Forgot Password?</h2>
+              <p className="text-sm text-slate-500">
                 Enter your registered email address and we'll send you a 6-digit reset code.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm flex items-start gap-2.5">
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -209,7 +209,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
 
             <form onSubmit={handleSendResetCode} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                   Registered Email
                 </label>
                 <div className="relative">
@@ -220,7 +220,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="student@example.com"
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                   />
                 </div>
               </div>
@@ -228,7 +228,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -236,7 +236,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                     <span>Sending Code...</span>
                   </>
                 ) : (
-                  <span>Send Reset Code</span>
+                  <span>Send Reset PIN</span>
                 )}
               </button>
             </form>
@@ -247,17 +247,17 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {step === 2 && (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 mb-2 border border-indigo-100 dark:border-indigo-900/50 mx-auto">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 mb-2 border border-indigo-100 mx-auto">
                 <ShieldCheck className="w-7 h-7" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Reset Your Password</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Enter the 6-digit PIN sent to <strong className="text-slate-700 dark:text-slate-300 break-all">{email}</strong> and create your new password.
+              <h2 className="text-2xl font-bold text-slate-900">Reset Your Password</h2>
+              <p className="text-sm text-slate-500">
+                Enter the 6-digit PIN sent to <strong className="text-slate-700 break-all">{email}</strong> and create your new password.
               </p>
             </div>
 
             {errorMessage && (
-              <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-sm flex items-start gap-2.5">
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -266,7 +266,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
             <form onSubmit={handleResetPassword} className="space-y-5">
               {/* 6-digit PIN Inputs */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 text-center">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 text-center">
                   6-Digit Verification PIN
                 </label>
                 <div className="flex justify-between gap-2 my-2">
@@ -279,7 +279,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                       value={digit}
                       onChange={(e) => handleOtpChange(idx, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(idx, e)}
-                      className="w-12 h-14 text-center text-xl font-bold bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                      className="w-12 h-14 text-center text-xl font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                     />
                   ))}
                 </div>
@@ -288,7 +288,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium hover:underline cursor-pointer"
+                    className="flex items-center gap-1 text-indigo-600 font-medium hover:underline cursor-pointer"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span>Change Email</span>
@@ -298,7 +298,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                     type="button"
                     onClick={handleResendCode}
                     disabled={resendCooldown > 0 || isLoading}
-                    className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline cursor-pointer disabled:opacity-50 disabled:no-underline"
+                    className="text-indigo-600 font-medium hover:underline cursor-pointer disabled:opacity-50 disabled:no-underline"
                   >
                     {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend PIN'}
                   </button>
@@ -308,7 +308,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
               {/* New Password Input */}
               <div className="relative">
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
                     New Password
                   </label>
                   
@@ -319,7 +319,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                       onMouseEnter={() => setShowPasswordTooltip(true)}
                       onMouseLeave={() => setShowPasswordTooltip(false)}
                       onClick={() => setShowPasswordTooltip(!showPasswordTooltip)}
-                      className="text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition"
+                      className="text-slate-400 hover:text-indigo-600 cursor-pointer transition"
                     >
                       <Info className="w-4 h-4" />
                     </button>
@@ -357,12 +357,12 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new strong password"
-                    className="w-full pl-4 pr-11 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                    className="w-full pl-4 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -372,7 +372,7 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
               <button
                 type="submit"
                 disabled={isLoading || !isPasswordValid}
-                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 cursor-pointer transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -390,20 +390,20 @@ export function ForgotPasswordModal({ isOpen, onClose, initialEmail = '', onSucc
         {/* STEP 3: SUCCESS CONFIRMATION */}
         {step === 3 && (
           <div className="text-center space-y-6 py-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/60 mx-auto">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200 mx-auto">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Password Reset Successfully!</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <h2 className="text-2xl font-bold text-slate-900">Password Reset Successfully!</h2>
+              <p className="text-sm text-slate-500">
                 Your account password has been updated. You can now log in using your new credentials.
               </p>
             </div>
 
             <button
               onClick={handleCloseModal}
-              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/25 cursor-pointer transition duration-200"
+              className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 cursor-pointer transition duration-200"
             >
               Back to Sign In
             </button>

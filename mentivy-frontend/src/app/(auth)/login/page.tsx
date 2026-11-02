@@ -48,7 +48,7 @@ export default function LoginPage() {
         setIsModalOpen(true);
       } else if (result.data?.user) {
         setAuth(result.data.user, result.data.accessToken);
-        if (result.data.user.role === 'ADMIN') {
+        if (result.data.user.role === 'ADMIN' || result.data.user.role === 'SUPER_ADMIN') {
           window.location.href = '/admin';
         } else {
           window.location.href = '/dashboard';
@@ -76,7 +76,7 @@ export default function LoginPage() {
     const result = await googleAuthAction(token);
     if (result.success && result.data?.user) {
       setAuth(result.data.user, result.data.accessToken);
-      if (result.data.user.role === 'ADMIN') {
+      if (result.data.user.role === 'ADMIN' || result.data.user.role === 'SUPER_ADMIN') {
         window.location.href = '/admin';
       } else {
         window.location.href = '/dashboard';
@@ -156,7 +156,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setIsForgotPasswordOpen(true)}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 hover:underline focus:outline-none cursor-pointer"
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 hover:underline focus:outline-none cursor-pointer"
               >
                 Forgot?
               </button>

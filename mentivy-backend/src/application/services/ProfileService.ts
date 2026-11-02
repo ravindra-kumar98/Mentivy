@@ -13,6 +13,7 @@ export class ProfileService {
             email: user?.email || '',
             phoneNumber: user?.phoneNumber || '',
             role: user?.role || 'STUDENT',
+            assignedFields: user?.assignedFields || [],
             avatarUrl: user?.avatarUrl || '',
             targetExam: profile?.targetExam || 'Not set',
             targetYear: profile?.targetYear || 2026,
